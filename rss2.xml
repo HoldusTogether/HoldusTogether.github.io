@@ -9,8 +9,40 @@
     <atom:link href="https://holdustogether.github.io/rss2.xml" rel="self" type="application/rss+xml"/>
     
     <description>不要停止成为更好的自己</description>
-    <pubDate>Sat, 20 Aug 2022 02:50:06 GMT</pubDate>
+    <pubDate>Sun, 21 Aug 2022 13:50:26 GMT</pubDate>
     <generator>http://hexo.io/</generator>
+    
+    <item>
+      <title>JVM概述</title>
+      <link>https://holdustogether.github.io/2022/08/21/JVM%E6%A6%82%E8%BF%B0/</link>
+      <guid>https://holdustogether.github.io/2022/08/21/JVM%E6%A6%82%E8%BF%B0/</guid>
+      <pubDate>Sun, 21 Aug 2022 13:50:26 GMT</pubDate>
+      
+        
+        
+      <description>&lt;h2 id=&quot;什么是-JVM&quot;&gt;&lt;a href=&quot;#什么是-JVM&quot; class=&quot;headerlink&quot; title=&quot;什么是 JVM ?&quot;&gt;&lt;/a&gt;什么是 JVM ?&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;定义：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Java Virtual</description>
+        
+      
+      
+      
+      <content:encoded><![CDATA[<h2 id="什么是-JVM"><a href="#什么是-JVM" class="headerlink" title="什么是 JVM ?"></a>什么是 JVM ?</h2><p><strong>定义：</strong></p><ul><li>Java Virtual Machine - java 程序的运行环境（java 二进制字节码的运行环境）</li></ul><p><strong>好处：</strong></p><ul><li>一次编写，到处运行·</li><li>自动内存管理，垃圾回收功能</li><li>数组下标越界检查</li><li>多态</li></ul><p><strong>比较：</strong></p><ul><li>jvm与jre、jdk</li><li>jvm是最底层，其次被jre包含，jre被jdkbaoh</li></ul><h2 id="学习-JVM-有什么用"><a href="#学习-JVM-有什么用" class="headerlink" title="学习 JVM 有什么用 ?"></a>学习 JVM 有什么用 ?</h2><ul><li>面试</li><li>理解底层的实现原理</li><li>程序员进阶技能</li></ul><h2 id="常见的-JVM"><a href="#常见的-JVM" class="headerlink" title="常见的 JVM"></a>常见的 JVM</h2><p><img src="/2022/08/21/JVM%E6%A6%82%E8%BF%B0/Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20220821214940771.png" alt="image-20220821214940771"></p><h2 id="学习路线"><a href="#学习路线" class="headerlink" title="学习路线"></a>学习路线</h2><p><img src="/2022/08/21/JVM%E6%A6%82%E8%BF%B0/Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20220821215002328.png" alt="image-20220821215002328"></p>]]></content:encoded>
+      
+      
+      <category domain="https://HoldusTogether.github.io/categories/Java/">Java</category>
+      
+      <category domain="https://HoldusTogether.github.io/categories/Java/JVM/">JVM</category>
+      
+      
+      <category domain="https://HoldusTogether.github.io/tags/Java/">Java</category>
+      
+      <category domain="https://HoldusTogether.github.io/tags/Jvm/">Jvm</category>
+      
+      
+      <comments>https://holdustogether.github.io/2022/08/21/JVM%E6%A6%82%E8%BF%B0/#disqus_thread</comments>
+      
+    </item>
     
     <item>
       <title>Hello World</title>
