@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"holdustogether.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Spring Boot篇为什么要用Spring Boot①独立运行SpringBoot内嵌servlet容器，Tomcat、Jetty等，现在不再需要打成war包部署到容器中，SpringBoot只要打成一个可执行的jar包就能独立运行，所有的依赖包都在一个jar包内。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Boot">
+<meta property="og:url" content="https://holdustogether.github.io/2022/09/01/spring%20boot%E7%AF%87/index.html">
+<meta property="og:site_name" content="南北橘子">
+<meta property="og:description" content="Spring Boot篇为什么要用Spring Boot①独立运行SpringBoot内嵌servlet容器，Tomcat、Jetty等，现在不再需要打成war包部署到容器中，SpringBoot只要打成一个可执行的jar包就能独立运行，所有的依赖包都在一个jar包内。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://holdustogether.github.io/2022/09/01/spring%20boot%E7%AF%87/image-20220831210440346.png">
+<meta property="og:image" content="https://holdustogether.github.io/2022/09/01/spring%20boot%E7%AF%87/image-20220831205215169.png">
+<meta property="og:image" content="https://holdustogether.github.io/2022/09/01/spring%20boot%E7%AF%87/image-20220831205327006.png">
+<meta property="og:image" content="https://holdustogether.github.io/2022/09/01/spring%20boot%E7%AF%87/image-20220831205450903.png">
+<meta property="og:image" content="https://holdustogether.github.io/2022/09/01/spring%20boot%E7%AF%87/image-20220831205601000.png">
+<meta property="og:image" content="https://holdustogether.github.io/2022/09/01/spring%20boot%E7%AF%87/image-20220831205728840.png">
+<meta property="og:image" content="https://holdustogether.github.io/2022/09/01/spring%20boot%E7%AF%87/image-20220831205842391.png">
+<meta property="og:image" content="https://holdustogether.github.io/2022/09/01/spring%20boot%E7%AF%87/image-20220831205901099.png">
+<meta property="og:image" content="https://holdustogether.github.io/2022/09/01/spring%20boot%E7%AF%87/image-20220831211924641.png">
+<meta property="og:image" content="https://holdustogether.github.io/2022/09/01/spring%20boot%E7%AF%87/image-20220831202106134.png">
+<meta property="article:published_time" content="2022-09-01T04:43:46.953Z">
+<meta property="article:modified_time" content="2022-09-01T12:04:43.309Z">
+<meta property="article:author" content="wFei">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Spring Boot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://holdustogether.github.io/2022/09/01/spring%20boot%E7%AF%87/image-20220831210440346.png">
+
+<link rel="canonical" href="https://holdustogether.github.io/2022/09/01/spring%20boot%E7%AF%87/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Spring Boot | 南北橘子</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/rss2.xml" title="南北橘子" type="application/rss+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/holdustogether" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">南北橘子</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://holdustogether.github.io/2022/09/01/spring%20boot%E7%AF%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="wFei">
+      <meta itemprop="description" content="不要停止成为更好的自己">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="南北橘子">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spring Boot
+        </h1>
+
+        <div class="post-meta">
+	  
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-09-01 12:43:46 / 修改时间：20:04:43" itemprop="dateCreated datePublished" datetime="2022-09-01T12:43:46+08:00">2022-09-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/Spring-Boot/" itemprop="url" rel="index"><span itemprop="name">Spring Boot</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Spring-Boot篇"><a href="#Spring-Boot篇" class="headerlink" title="Spring Boot篇"></a>Spring Boot篇</h1><h2 id="为什么要用Spring-Boot"><a href="#为什么要用Spring-Boot" class="headerlink" title="为什么要用Spring Boot"></a>为什么要用Spring Boot</h2><p>①独立运行<br>SpringBoot内嵌servlet容器，Tomcat、Jetty等，现在不再需要打成war包部署到容器中，SpringBoot只要打成一个可执行的jar包就能独立运行，所有的依赖包都在一个jar包内。</p>
+<span id="more"></span>
+
+<p>②简化配置<br>spring-boot-starter-web启动器自动依赖其他组件，简少了maven的配置。</p>
+<p>③自动配置<br>SpringBoot能根据当前类路径下的类、jar包来自动配置bean，如添加一个spring-boot-starter-web启动器就能拥有web的功能，无需其他配置。</p>
+<p>④无代码生成和XML配置<br>SpringBoot配置过程中无代码生成，也无需XML配置文件就能完成所有配置工作，这一切都是借助于条件注解完成的，这也是Spring4.x的核心功能之一。</p>
+<p>⑤应用监控<br>SpringBoot提供一系列端点可以监控服务及应用，做健康检测。</p>
+<p>缺点：<br>SpringBoot虽然很容易上手，但如果不了解其核心技术及流程，一遇到问题就很棘手，而且现在的解决方案也不多，需要一个完善的过程。</p>
+<h2 id="创建SpringBoot项目的方式"><a href="#创建SpringBoot项目的方式" class="headerlink" title="创建SpringBoot项目的方式"></a>创建SpringBoot项目的方式</h2><p>1.通过web方式在官网在线构建SpringBoot项目</p>
+<p>2.使用idea等开发工具进行创建</p>
+<p>3.基于Maven构建SpringBoot项目</p>
+<h2 id="运行SpringBoot的方式"><a href="#运行SpringBoot的方式" class="headerlink" title="运行SpringBoot的方式"></a>运行SpringBoot的方式</h2><img src="/2022/09/01/spring%20boot%E7%AF%87/image-20220831210440346.png" alt="image-20220831210440346" style="zoom:67%;">
+
+<h2 id="SpringBoot的核心注解"><a href="#SpringBoot的核心注解" class="headerlink" title="SpringBoot的核心注解"></a>SpringBoot的核心注解</h2><p>@SpringBootApplication</p>
+<p>包含3个注解</p>
+<p>@SpringBootConfiguration ：组合了@Congifuration注解，实现配置文件的功能</p>
+<p>@EnableAutoConfiguration：打开自动配置功能</p>
+<p>@ComponentScan：Spring组件扫描</p>
+<h2 id="parent"><a href="#parent" class="headerlink" title="parent"></a>parent</h2><p>使用parent可以帮助开发者进行版本的统一管理。</p>
+<h2 id="starter"><a href="#starter" class="headerlink" title="starter"></a>starter</h2><p>starter定义了使用某种技术时对于依赖的固定搭配格式（在某些场景下包含的一系列依赖），也是一种最佳解决方案，使用starter可以帮助开发者减少依赖配置</p>
+<p><strong>starter与parent的区别</strong></p>
+<p>​		<font color="#ff0000"><b>starter</b></font>是一个坐标中定了若干个坐标，以前写多个的，现在写一个，<font color="#ff0000"><b>是用来减少依赖配置的书写量的</b></font>。</p>
+<p>​		<font color="#ff0000"><b>parent</b></font>是定义了几百个依赖版本号，以前写依赖需要自己手工控制版本，现在由SpringBoot统一管理，这样就不存在版本冲突了，<font color="#ff0000"><b>是用来减少依赖冲突的</b></font>。</p>
+<h2 id="引导类"><a href="#引导类" class="headerlink" title="引导类"></a>引导类</h2><p>SpringBoot程序启动还是创建了一个Spring容器对象。当前运行的这个类在SpringBoot程序中是所有功能的入口，称为<font color="#ff0000"><b>引导类</b></font>。</p>
+<p>作为一个引导类最典型的特征就是当前类上方声明了一个注解<font color="#ff0000"><b>@SpringBootApplication</b></font>。</p>
+<ol>
+<li>SpringBoot工程提供引导类用来启动程序</li>
+<li>SpringBoot工程启动后创建并初始化Spring容器</li>
+</ol>
+<h2 id="内嵌tomcat"><a href="#内嵌tomcat" class="headerlink" title="内嵌tomcat"></a>内嵌tomcat</h2><ol>
+<li>内嵌Tomcat服务器是SpringBoot辅助功能之一</li>
+<li>内嵌Tomcat工作原理是将Tomcat服务器作为对象运行，并将该对象交给Spring容器管理</li>
+<li>变更内嵌服务器思想是去除现有服务器，添加全新的服务器</li>
+</ol>
+<h2 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h2><p>SpringBoot默认配置文件是application.properties</p>
+<ol>
+<li><p>SpringBoot程序可以在application.properties文件中进行属性配置</p>
+</li>
+<li><p>application.properties文件中只要输入要配置的属性关键字就可以根据提示进行设置</p>
+</li>
+<li><p>SpringBoot将配置信息集中在一个文件中写，不管你是服务器的配置，还是数据库的配置，总之都写在一起，逃离一个项目十几种配置文件格式的尴尬局面</p>
+</li>
+</ol>
+<p>SpringBoot除了支持properties格式的配置文件，还支持另外两种格式的配置文件。三种配置文件格式分别如下:</p>
+<ul>
+<li>properties格式</li>
+<li>yml格式</li>
+<li>yaml格式</li>
+</ul>
+<ol>
+<li>配置文件间的加载优先级	properties（最高）&gt;  yml  &gt;  yaml（最低）</li>
+<li>不同配置文件中相同配置按照加载优先级相互覆盖，不同配置文件中不同配置全部保留</li>
+</ol>
+<p>yaml书写格式</p>
+<ol>
+<li>大小写敏感</li>
+<li>属性层级关系使用多行描述，<strong>每行结尾使用冒号结束</strong></li>
+<li>使用缩进表示层级关系，同层级左侧对齐，只允许使用空格（不允许使用Tab键）</li>
+<li>属性值前面添加空格（属性名与属性值之间使用冒号+空格作为分隔）</li>
+<li>#号 表示注释</li>
+</ol>
+<img src="/2022/09/01/spring%20boot%E7%AF%87/image-20220831205215169.png" alt="image-20220831205215169" style="zoom: 67%;">
+
+<p>字面值、对象数据格式、数组数据格式</p>
+<img src="/2022/09/01/spring%20boot%E7%AF%87/image-20220831205327006.png" alt="image-20220831205327006" style="zoom:67%;">
+
+<p>yaml数据读取</p>
+<p>yaml中保存的单个数据，可以使用Spring中的注解@Value读取单个数据，属性名引用方式：<font color="#ff0000"><b>${一级属性名.二级属性名……}</b></font></p>
+<img src="/2022/09/01/spring%20boot%E7%AF%87/image-20220831205450903.png" alt="image-20220831205450903" style="zoom:67%;">
+
+<p>读取全部数据</p>
+<ol>
+<li>使用Environment对象封装全部配置信息</li>
+<li>使用@Autowired自动装配数据到Environment对象中</li>
+</ol>
+<img src="/2022/09/01/spring%20boot%E7%AF%87/image-20220831205601000.png" alt="image-20220831205601000" style="zoom:67%;">
+
+<p>读取对象数据</p>
+<p>首先定义一个对象，并将该对象纳入Spring管控的范围，也就是定义成一个bean，然后使用注解@ConfigurationProperties指定该对象加载哪一组yaml中配置的信息。</p>
+<img src="/2022/09/01/spring%20boot%E7%AF%87/image-20220831205728840.png" alt="image-20220831205728840" style="zoom:67%;">
+
+<ol>
+<li>使用@ConfigurationProperties注解绑定配置信息到封装类中</li>
+<li>封装类需要定义为Spring管理的bean，否则无法进行属性注入</li>
+</ol>
+<p>数据引用</p>
+<ol>
+<li>在配置文件中可以使用${属性名}方式引用属性值</li>
+<li>如果属性中出现特殊字符，可以使用双引号包裹起来作为字符解析</li>
+</ol>
+<img src="/2022/09/01/spring%20boot%E7%AF%87/image-20220831205842391.png" alt="image-20220831205842391" style="zoom:67%;">
+
+<p>在书写字符串时，如果需要使用转义字符，需要将数据字符串使用双引号包裹起来</p>
+<img src="/2022/09/01/spring%20boot%E7%AF%87/image-20220831205901099.png" alt="image-20220831205901099" style="zoom:67%;">
+
+<p>配置文件分类</p>
+<p>SpringBoot提供的4个级别的配置文件：</p>
+<ul>
+<li><p>类路径下配置文件（一直使用的是这个，也就是resources目录中的application.yml文件）</p>
+</li>
+<li><p>类路径下config目录下配置文件</p>
+</li>
+<li><p>程序包所在目录中配置文件</p>
+</li>
+<li><p>程序包所在目录中config目录下配置文件</p>
+<p>上面4个文件的加载优先顺序为</p>
+<ol>
+<li>file ：config&#x2F;application.yml <strong>【最高】</strong></li>
+<li>file ：application.yml</li>
+<li>classpath：config&#x2F;application.yml</li>
+<li>classpath：application.yml  <strong>【最低】</strong></li>
+</ol>
+</li>
+</ul>
+<p>自定义配置文件</p>
+<ol>
+<li>配置文件可以修改名称，通过启动参数设定</li>
+<li>配置文件可以修改路径，通过启动参数设定</li>
+<li>微服务开发中配置文件通过配置中心进行设置</li>
+</ol>
+<p>多环境开发（yaml单一文件版）	</p>
+<ol>
+<li><p>多环境开发需要设置若干种常用环境，例如开发、生产、测试环境</p>
+</li>
+<li><p>yaml格式中设置多环境使用—区分环境设置边界</p>
+</li>
+<li><p>每种环境的区别在于加载的配置属性不同</p>
+</li>
+<li><p>启用某种环境时需要指定启动时使用该环境</p>
+<img src="/2022/09/01/spring%20boot%E7%AF%87/image-20220831211924641.png" alt="image-20220831211924641" style="zoom:67%;"></li>
+</ol>
+<p>多环境开发（yaml多文件版）</p>
+<p>环境配置文件因为每一个都是配置自己的项，所以连名字都不用写里面了，使用文件名区分。</p>
+<p>文件的命名规则为：application-环境名.yml。</p>
+<ul>
+<li>主配置文件中设置公共配置（全局）</li>
+<li>环境分类配置文件中常用于设置冲突属性（局部）</li>
+</ul>
+<ol>
+<li><p>可以使用独立配置文件定义环境属性</p>
+</li>
+<li><p>独立配置文件便于线上系统维护更新并保障系统安全性</p>
+</li>
+</ol>
+<h2 id="SpringBoot中加载配置的几种方式"><a href="#SpringBoot中加载配置的几种方式" class="headerlink" title="SpringBoot中加载配置的几种方式"></a>SpringBoot中加载配置的几种方式</h2><p>1、properties文件；</p>
+<p>2、YAML文件；</p>
+<p>3、系统环境变量；</p>
+<p>4、命令行参数；</p>
+<h2 id="如何使用-Spring-Boot-实现异常处理？"><a href="#如何使用-Spring-Boot-实现异常处理？" class="headerlink" title="如何使用 Spring Boot 实现异常处理？"></a>如何使用 Spring Boot 实现异常处理？</h2><p>Spring 提供了一种使用 ControllerAdvice 处理异常的非常有用的方法。 我们通过实现一个 ControlerAdvice 类，来处理控制器类抛出的所有异常。</p>
+<h2 id="SpringBoot程序的打包与运行"><a href="#SpringBoot程序的打包与运行" class="headerlink" title="SpringBoot程序的打包与运行"></a>SpringBoot程序的打包与运行</h2><ol>
+<li>SpringBoot工程可以基于java环境下独立运行jar文件启动服务</li>
+<li>SpringBoot工程执行mvn命令package进行打包</li>
+<li>执行jar命令：java –jar 工程名.jar</li>
+</ol>
+<h2 id="日志"><a href="#日志" class="headerlink" title="日志"></a>日志</h2><p>日志其实就是记录程序日常运行的信息，主要作用如下：</p>
+<ul>
+<li>编程期调试代码</li>
+<li>运营期记录信息</li>
+<li>记录日常运营重要信息（峰值流量、平均响应时长……）</li>
+<li>记录应用报错信息（错误堆栈）</li>
+<li>记录运维过程数据（扩容、宕机、报警……）</li>
+</ul>
+<p>日志的级别分为6种，分别是：</p>
+<ul>
+<li>TRACE：运行堆栈信息，使用率低</li>
+<li>DEBUG：程序员调试代码使用</li>
+<li>INFO：记录运维过程数据</li>
+<li>WARN：记录运维过程报警数据</li>
+<li>ERROR：记录错误堆栈信息</li>
+<li>FATAL：灾难信息，合并计入ERROR</li>
+</ul>
+<p>一般情况下，开发时候使用DEBUG，上线后使用INFO，运维信息记录使用WARN即可。</p>
+<p>基于lombok提供的@Slf4j注解为类快速添加日志对象</p>
+<h2 id="实现热部署"><a href="#实现热部署" class="headerlink" title="实现热部署"></a>实现热部署</h2><img src="/2022/09/01/spring%20boot%E7%AF%87/image-20220831202106134.png" alt="image-20220831202106134" style="zoom:80%;">
+
+<h2 id="Spring-Boot-中的监视器是什么？"><a href="#Spring-Boot-中的监视器是什么？" class="headerlink" title="Spring Boot 中的监视器是什么？"></a>Spring Boot 中的监视器是什么？</h2><p>Spring boot actuator 是 spring 启动框架中的重要功能之一。Spring boot 监视器可帮助您访 问生产环境中正在运行的应用程序的当前状态。有几个指标必须在生产环境中进行检查和 监控。即使一些外部应用程序可能正在使用这些服务来向相关人员触发警报消息。监视器 模块公开了一组可直接作为 HTTP URL 访问的 REST 端点来检查状态。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>原创技术分享，您的支持将鼓励我继续创作</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="wFei 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="wFei 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>wFei
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://holdustogether.github.io/2022/09/01/spring%20boot%E7%AF%87/" title="Spring Boot">https://holdustogether.github.io/2022/09/01/spring boot篇/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/Spring-Boot/" rel="tag"># Spring Boot</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/09/01/SSM%E6%A1%86%E6%9E%B6%E7%AF%87/" rel="prev" title="SSM框架篇">
+      <i class="fa fa-chevron-left"></i> SSM框架篇
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/09/01/MYSQL%E7%AF%87/" rel="next" title="MySql篇">
+      MySql篇 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring-Boot%E7%AF%87"><span class="nav-number">1.</span> <span class="nav-text">Spring Boot篇</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%94%A8Spring-Boot"><span class="nav-number">1.1.</span> <span class="nav-text">为什么要用Spring Boot</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BASpringBoot%E9%A1%B9%E7%9B%AE%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="nav-number">1.2.</span> <span class="nav-text">创建SpringBoot项目的方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%90%E8%A1%8CSpringBoot%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="nav-number">1.3.</span> <span class="nav-text">运行SpringBoot的方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SpringBoot%E7%9A%84%E6%A0%B8%E5%BF%83%E6%B3%A8%E8%A7%A3"><span class="nav-number">1.4.</span> <span class="nav-text">SpringBoot的核心注解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#parent"><span class="nav-number">1.5.</span> <span class="nav-text">parent</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#starter"><span class="nav-number">1.6.</span> <span class="nav-text">starter</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%95%E5%AF%BC%E7%B1%BB"><span class="nav-number">1.7.</span> <span class="nav-text">引导类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%B5%8Ctomcat"><span class="nav-number">1.8.</span> <span class="nav-text">内嵌tomcat</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">1.9.</span> <span class="nav-text">配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SpringBoot%E4%B8%AD%E5%8A%A0%E8%BD%BD%E9%85%8D%E7%BD%AE%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F"><span class="nav-number">1.10.</span> <span class="nav-text">SpringBoot中加载配置的几种方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Spring-Boot-%E5%AE%9E%E7%8E%B0%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%EF%BC%9F"><span class="nav-number">1.11.</span> <span class="nav-text">如何使用 Spring Boot 实现异常处理？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SpringBoot%E7%A8%8B%E5%BA%8F%E7%9A%84%E6%89%93%E5%8C%85%E4%B8%8E%E8%BF%90%E8%A1%8C"><span class="nav-number">1.12.</span> <span class="nav-text">SpringBoot程序的打包与运行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A5%E5%BF%97"><span class="nav-number">1.13.</span> <span class="nav-text">日志</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E7%83%AD%E9%83%A8%E7%BD%B2"><span class="nav-number">1.14.</span> <span class="nav-text">实现热部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Boot-%E4%B8%AD%E7%9A%84%E7%9B%91%E8%A7%86%E5%99%A8%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">1.15.</span> <span class="nav-text">Spring Boot 中的监视器是什么？</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="wFei"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">wFei</p>
+  <div class="site-description" itemprop="description">不要停止成为更好的自己</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/holdustogether" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;holdustogether" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/wf1657885988@163.com" title="E-Mail → wf1657885988@163.com"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+	<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=450 src="//music.163.com/outchain/player?type=0&id=7614662893&auto=1&height=430"></iframe>
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022.08 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wFei</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">博客全站共53.7k字</span>
+</div>
+
+    <div>
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+    </div>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='128,136,147' opacity='0.8' zIndex='-1' count='150' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  <!-- ҳ����С���� -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>

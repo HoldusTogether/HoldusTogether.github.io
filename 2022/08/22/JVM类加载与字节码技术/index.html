@@ -31,8 +31,32 @@
 <meta property="og:description" content="1. 类的文件结构 1.1 魔数 0~3 字节，表示它是否是【class】类型的文件  0000000 ca fe ba be 00 00 00 34 00 23 0a 00 06 00 15 09">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220822145500913.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918103529201.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918103753258.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918104707749.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918104951679.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918105241895.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918110023747.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918112619676.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918113007437.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918113044757.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918113107342.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918113143812.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918113827109.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114223826.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114236000.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114249488.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114333971.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114346565.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114356723.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114420583.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114437030.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114451496.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114503775.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114531832.png">
+<meta property="og:image" content="https://holdustogether.github.io/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114611352.png">
 <meta property="article:published_time" content="2022-08-22T06:42:43.861Z">
-<meta property="article:modified_time" content="2022-08-30T03:08:17.370Z">
+<meta property="article:modified_time" content="2022-09-18T07:38:29.014Z">
 <meta property="article:author" content="wFei">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="JVM">
@@ -229,7 +253,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-08-30 11:08:17" itemprop="dateModified" datetime="2022-08-30T11:08:17+08:00">2022-08-30</time>
+                <time title="修改时间：2022-09-18 15:38:29" itemprop="dateModified" datetime="2022-09-18T15:38:29+08:00">2022-09-18</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -384,6 +408,30 @@
 <p>细心的同学应当注意到，以上比较指令中没有 long，float，double 的比较，那么它们要比较怎</p>
 <p>么办？</p>
 <p>参考 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-6.html#jvms-6.5.lcmp">https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-6.html#jvms-6.5.lcmp</a></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918103529201.png" alt="image-20220918103529201"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918103753258.png" alt="image-20220918103753258"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918104707749.png" alt="image-20220918104707749"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918104951679.png" alt="image-20220918104951679"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918105241895.png" alt="image-20220918105241895"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918110023747.png" alt="image-20220918110023747"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918112619676.png" alt="image-20220918112619676"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918113007437.png" alt="image-20220918113007437"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918113044757.png" alt="image-20220918113044757"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918113107342.png" alt="image-20220918113107342"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918113143812.png" alt="image-20220918113143812"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918113827109.png" alt="image-20220918113827109"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114223826.png" alt="image-20220918114223826"></p>
+<p> <img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114236000.png" alt="image-20220918114236000"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114249488.png" alt="image-20220918114249488"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114333971.png" alt="image-20220918114333971"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114346565.png" alt="image-20220918114346565"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114356723.png" alt="image-20220918114356723"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114420583.png" alt="image-20220918114420583"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114437030.png" alt="image-20220918114437030"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114451496.png" alt="image-20220918114451496"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114503775.png" alt="image-20220918114503775"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114531832.png" alt="image-20220918114531832"></p>
+<p><img src="/JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8A%80%E6%9C%AF.assets/image-20220918114611352.png" alt="image-20220918114611352"></p>
 
     </div>
 
@@ -540,20 +588,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-count">14</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">14</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -605,7 +653,7 @@
 -->
 <div class="theme-info">
   <div class="powered-by"></div>
-  <span class="post-count">博客全站共7.1k字</span>
+  <span class="post-count">博客全站共53.7k字</span>
 </div>
 
     <div>
