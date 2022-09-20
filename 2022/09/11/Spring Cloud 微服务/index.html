@@ -23,19 +23,19 @@
     var CONFIG = {"hostname":"holdustogether.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="常见面试题1.1 什么是微服务？ 对于微服务，业界并没有一个统一的，标准的定义。 微服务架构是一种架构模式，或者说是一种架构风格，将单一的应用程序划分成一组小的服务，每个服务运行在其独立的自己的进程内，服务之间采用轻量级的通信机制（HTTP）相互沟通，互相协调，为用户提供价值。 微服务化的核心就是将传统的一站式应用，根据业务拆分成一个一个的服务，彻底地去耦合，每一个微服务提供单个业务功能的服务，一">
+  <meta name="description" content="常见面试题1.1 什么是微服务？ 对于微服务，业界并没有一个统一的，标准的定义。 微服务架构是一种架构模式，或者说是一种架构风格，将单一的应用程序划分成一组小的服务，每个服务运行在其独立的自己的进程内，服务之间采用轻量级的通信机制（HTTP）相互沟通，互相协调，为用户提供价值。 微服务化的核心就是将传统的一站式应用，根据业务拆分成一个一个的服务，彻底地去耦合，每一个微服务提供单个业务功能的服务">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Spring Cloud">
 <meta property="og:url" content="https://holdustogether.github.io/2022/09/11/Spring%20Cloud%20%E5%BE%AE%E6%9C%8D%E5%8A%A1/index.html">
 <meta property="og:site_name" content="南北橘子">
-<meta property="og:description" content="常见面试题1.1 什么是微服务？ 对于微服务，业界并没有一个统一的，标准的定义。 微服务架构是一种架构模式，或者说是一种架构风格，将单一的应用程序划分成一组小的服务，每个服务运行在其独立的自己的进程内，服务之间采用轻量级的通信机制（HTTP）相互沟通，互相协调，为用户提供价值。 微服务化的核心就是将传统的一站式应用，根据业务拆分成一个一个的服务，彻底地去耦合，每一个微服务提供单个业务功能的服务，一">
+<meta property="og:description" content="常见面试题1.1 什么是微服务？ 对于微服务，业界并没有一个统一的，标准的定义。 微服务架构是一种架构模式，或者说是一种架构风格，将单一的应用程序划分成一组小的服务，每个服务运行在其独立的自己的进程内，服务之间采用轻量级的通信机制（HTTP）相互沟通，互相协调，为用户提供价值。 微服务化的核心就是将传统的一站式应用，根据业务拆分成一个一个的服务，彻底地去耦合，每一个微服务提供单个业务功能的服务">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://holdustogether.github.io/2022/09/11/Spring%20Cloud%20%E5%BE%AE%E6%9C%8D%E5%8A%A1/image-20220912173002658.png">
 <meta property="og:image" content="https://holdustogether.github.io/2022/09/11/Spring%20Cloud%20%E5%BE%AE%E6%9C%8D%E5%8A%A1/image-20220912173236315.png">
 <meta property="og:image" content="https://holdustogether.github.io/2022/09/11/Spring%20Cloud%20%E5%BE%AE%E6%9C%8D%E5%8A%A1/image-20220913113408462.png">
 <meta property="og:image" content="https://holdustogether.github.io/2022/09/11/Spring%20Cloud%20%E5%BE%AE%E6%9C%8D%E5%8A%A1/image-20220913113956551.png">
 <meta property="article:published_time" content="2022-09-11T02:36:21.202Z">
-<meta property="article:modified_time" content="2022-09-13T15:34:20.811Z">
+<meta property="article:modified_time" content="2022-09-20T03:38:00.542Z">
 <meta property="article:author" content="wFei">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="Spring Cloud">
@@ -233,7 +233,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-09-13 23:34:20" itemprop="dateModified" datetime="2022-09-13T23:34:20+08:00">2022-09-13</time>
+                <time title="修改时间：2022-09-20 11:38:00" itemprop="dateModified" datetime="2022-09-20T11:38:00+08:00">2022-09-20</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -267,7 +267,9 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="常见面试题"><a href="#常见面试题" class="headerlink" title="常见面试题"></a>常见面试题</h2><h3 id="1-1-什么是微服务？"><a href="#1-1-什么是微服务？" class="headerlink" title="1.1 什么是微服务？"></a>1.1 什么是微服务？</h3><blockquote>
+        <span id="more"></span>
+
+<h2 id="常见面试题"><a href="#常见面试题" class="headerlink" title="常见面试题"></a>常见面试题</h2><h3 id="1-1-什么是微服务？"><a href="#1-1-什么是微服务？" class="headerlink" title="1.1 什么是微服务？"></a>1.1 什么是微服务？</h3><blockquote>
 <p>对于微服务，业界并没有一个统一的，标准的定义。</p>
 <p>微服务架构是一种架构模式，或者说是一种架构风格，将单一的应用程序划分成一组小的服务，每个服务运行在其独立的自己的进程内，服务之间采用轻量级的通信机制（HTTP）相互沟通，互相协调，为用户提供价值。</p>
 <p>微服务化的核心就是将传统的一站式应用，根据业务拆分成一个一个的服务，彻底地去耦合，每一个微服务提供单个业务功能的服务，一个服务做一件事情。</p>

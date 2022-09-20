@@ -23,12 +23,12 @@
     var CONFIG = {"hostname":"holdustogether.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="概览 1. 程序计数器 1.1 定义 Program Counter Register 程序计数器（寄存器）  作用——是记住下一条jvm指令的执行地址 特点 线程私有  不会存在内存溢出">
+  <meta name="description" content="概览 1. 程序计数器 1.1 定义 Program Counter Register 程序计数器（寄存器）  作用——是记住下一条jvm指令的执行地址 特点 线程私有  不会存在内存溢出     1.2 作用 记录下一跳在哪  2. 虚拟机栈 2.1 定义 Java Virtual Machine Stacks （Java 虚拟机栈）  每个线程运行时所需要的内存，称为虚拟机栈 每个栈由多个">
 <meta property="og:type" content="article">
 <meta property="og:title" content="JVM内存结构">
 <meta property="og:url" content="https://holdustogether.github.io/2022/08/22/JVM%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84/index.html">
 <meta property="og:site_name" content="南北橘子">
-<meta property="og:description" content="概览 1. 程序计数器 1.1 定义 Program Counter Register 程序计数器（寄存器）  作用——是记住下一条jvm指令的执行地址 特点 线程私有  不会存在内存溢出">
+<meta property="og:description" content="概览 1. 程序计数器 1.1 定义 Program Counter Register 程序计数器（寄存器）  作用——是记住下一条jvm指令的执行地址 特点 线程私有  不会存在内存溢出     1.2 作用 记录下一跳在哪  2. 虚拟机栈 2.1 定义 Java Virtual Machine Stacks （Java 虚拟机栈）  每个线程运行时所需要的内存，称为虚拟机栈 每个栈由多个">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://holdustogether.github.io/JVM%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84.assets/image-20220822091326221.png">
 <meta property="og:image" content="https://holdustogether.github.io/JVM%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84.assets/image-20220822091419608.png">
@@ -41,7 +41,7 @@
 <meta property="og:image" content="https://holdustogether.github.io/JVM%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84.assets/image-20220822095801877.png">
 <meta property="og:image" content="https://holdustogether.github.io/JVM%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84.assets/image-20220822103422838.png">
 <meta property="article:published_time" content="2022-08-22T01:09:55.646Z">
-<meta property="article:modified_time" content="2022-08-23T12:55:01.872Z">
+<meta property="article:modified_time" content="2022-09-20T03:37:04.856Z">
 <meta property="article:author" content="wFei">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="JVM">
@@ -238,7 +238,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-08-23 20:55:01" itemprop="dateModified" datetime="2022-08-23T20:55:01+08:00">2022-08-23</time>
+                <time title="修改时间：2022-09-20 11:37:04" itemprop="dateModified" datetime="2022-09-20T11:37:04+08:00">2022-09-20</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -272,7 +272,9 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p><img src="/JVM%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84.assets/image-20220822091326221.png" alt="image-20220822091326221"></p>
+        <span id="more"></span>
+
+<h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p><img src="/JVM%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84.assets/image-20220822091326221.png" alt="image-20220822091326221"></p>
 <h2 id="1-程序计数器"><a href="#1-程序计数器" class="headerlink" title="1. 程序计数器"></a>1. 程序计数器</h2><p><img src="/JVM%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84.assets/image-20220822091419608.png" alt="image-20220822091419608"></p>
 <h3 id="1-1-定义"><a href="#1-1-定义" class="headerlink" title="1.1 定义"></a><strong>1.1 定义</strong></h3><hr>
 <p>Program Counter Register 程序计数器（寄存器）</p>
@@ -282,7 +284,7 @@
 <li><p>线程私有</p>
 </li>
 <li><p>不会存在内存溢出</p>
-<span id="more"></span></li>
+</li>
 </ul>
 </li>
 </ul>
