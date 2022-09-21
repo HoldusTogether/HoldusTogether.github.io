@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"holdustogether.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="系统设计-分布式高并发">
+<meta property="og:type" content="article">
+<meta property="og:title" content="系统设计-分布式高并发">
+<meta property="og:url" content="https://holdustogether.github.io/2022/09/21/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A101/index.html">
+<meta property="og:site_name" content="南北橘子">
+<meta property="og:description" content="系统设计-分布式高并发">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://holdustogether.github.io/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1.assets/202206222244561.png">
+<meta property="og:image" content="https://holdustogether.github.io/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1.assets/202206222244409.png">
+<meta property="article:published_time" content="2022-09-21T04:01:45.728Z">
+<meta property="article:modified_time" content="2022-09-21T04:01:45.728Z">
+<meta property="article:author" content="wFei">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="系统设计">
+<meta property="article:tag" content="分布式">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://holdustogether.github.io/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1.assets/202206222244561.png">
+
+<link rel="canonical" href="https://holdustogether.github.io/2022/09/21/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A101/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>系统设计-分布式高并发 | 南北橘子</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/rss2.xml" title="南北橘子" type="application/rss+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/holdustogether" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">南北橘子</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://holdustogether.github.io/2022/09/21/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A101/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="wFei">
+      <meta itemprop="description" content="不要停止成为更好的自己">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="南北橘子">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          系统设计-分布式高并发
+        </h1>
+
+        <div class="post-meta">
+	  
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-09-21 12:01:45" itemprop="dateCreated datePublished" datetime="2022-09-21T12:01:45+08:00">2022-09-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">系统设计</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="系统设计-分布式高并发"><a href="#系统设计-分布式高并发" class="headerlink" title="系统设计-分布式高并发"></a>系统设计-分布式高并发</h1><span id="more"></span>
+
+<p>引用自**[阿秀的学习笔记](<a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html">系统设计01-03 | 阿秀的学习笔记 (interviewguide.cn)</a>)**！只为个人学习方便。如有侵权，立刻删除。</p>
+<h2 id="1、分布式系统基本概念"><a href="#1、分布式系统基本概念" class="headerlink" title="1、分布式系统基本概念"></a>1、分布式系统基本概念</h2><h3 id="1、CAP理论基础"><a href="#1、CAP理论基础" class="headerlink" title="#1、CAP理论基础"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#_1%E3%80%81cap%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80">#</a>1、CAP理论基础</h3><p>分布式系统的最大难点，就是各个节点的状态如何同步。CAP 定理是这方面的基本定理，也是理解分布式系统的起点。</p>
+<p>1998年，加州大学的计算机科学家 Eric Brewer 提出，分布式系统有三个指标：</p>
+<blockquote>
+<ul>
+<li>Consistency</li>
+<li>Availability</li>
+<li>Partition tolerance</li>
+</ul>
+</blockquote>
+<p>它们的第一个字母分别是 <code>C</code>、<code>A</code>、<code>P</code>。Eric Brewer 说，这三个指标不可能同时做到。这个结论就叫做 <code>CAP</code> 定理。</p>
+<p>它指出对于一个分布式计算系统来说，不可能同时满足以下三点：</p>
+<ul>
+<li>一致性（Consistency） ：等同于所有节点访问同一份最新的数据副本，或者说同一数据在不同节点上的副本在同一逻辑时钟应当是相同的内容。</li>
+<li>可用性（Availability）：每次请求都能获取到非错的响应，以及尽量保证低延迟，但是不保证获取的数据为最新数据。</li>
+<li>分区容错性（Partition tolerance）：以实际效果而言，分区相当于对<strong>通信的时限要求</strong>。要求任意节点故障时，系统仍然可以对外服务。</li>
+</ul>
+<h3 id="2、数据一致性（C侧）"><a href="#2、数据一致性（C侧）" class="headerlink" title="#2、数据一致性（C侧）"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#_2%E3%80%81%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7-c%E4%BE%A7">#</a>2、数据一致性（C侧）</h3><p>一些分布式系统通过复制数据来提高系统的可靠性和容错性，并且将数据的不同的副本存放在不同的机器，由于维护数据副本的一致性代价高，因此许多系统<strong>采用弱一致性来提高性能</strong>，一些不同的一致性模型也相继被提出。</p>
+<ul>
+<li><strong>强一致性</strong>： 要求无论更新操作实在哪一个副本执行，之后所有的读操作都要能获得最新的数据。</li>
+<li><strong>弱一致性</strong>：用户读到某一操作对系统特定数据的更新需要一段时间，我们称这段时间为“不一致性窗口”。</li>
+<li><strong>最终一致性</strong>：是弱一致性的一种特例，保证用户<strong>最终（即窗口尽量长）</strong>能够读取到某操作对系统特定数据的更新。</li>
+</ul>
+<h4 id="一致性解决方案"><a href="#一致性解决方案" class="headerlink" title="#一致性解决方案"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#%E4%B8%80%E8%87%B4%E6%80%A7%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88">#</a>一致性解决方案</h4><ol>
+<li>分布式事务：两段提交</li>
+<li>分布式锁</li>
+<li>消息队列、消息持久化、重试、幂等操作</li>
+<li>Raft &#x2F; Paxos 等一致性算法</li>
+</ol>
+<h3 id="3、服务可用性（A侧）"><a href="#3、服务可用性（A侧）" class="headerlink" title="#3、服务可用性（A侧）"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#_3%E3%80%81%E6%9C%8D%E5%8A%A1%E5%8F%AF%E7%94%A8%E6%80%A7-a%E4%BE%A7">#</a>3、服务可用性（A侧）</h3><p>可用性，意思是只要收到用户的请求，服务器就必须给出回应。</p>
+<h4 id="高可用解决方案"><a href="#高可用解决方案" class="headerlink" title="#高可用解决方案"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#%E9%AB%98%E5%8F%AF%E7%94%A8%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88">#</a>高可用解决方案</h4><ul>
+<li><strong>负载均衡</strong>：尽力将网络流量平均分发到多个服务器上，以提高系统整体的响应速度和可用性。</li>
+<li><strong>降级</strong>：当服务器压力剧增的情况下，根据当前业务情况及流量对一些服务和页面有策略的降级，以此释放服务器资源以保证核心任务的正常运行。</li>
+<li><strong>熔断</strong>：对于目标服务的请求和调用大量超时或失败，这时应该熔断该服务的所有调用，并且对于后续调用应直接返回，从而快速释放资源。确保在目标服务不可用的这段时间内，所有对它的调用都是立即返回的、不会阻塞的，等到目标服务好转后进行接口恢复。</li>
+<li><strong>流量控制</strong>：流量控制可以有效的防止由于网络中瞬间的大量数据对网络带来的冲击，保证用户网络高效而稳定的运行，类似于TCP拥塞控制方法。</li>
+<li><strong>异地多活</strong>：在不同地区维护不同子系统，并保证子系统的可用性</li>
+</ul>
+<p>熔断是减少由于下游服务故障对自己的影响；而降级则是在整个系统的角度上，考虑业务整体流量，保护核心业务稳定。</p>
+<h3 id="4、分区容错性（P侧）"><a href="#4、分区容错性（P侧）" class="headerlink" title="#4、分区容错性（P侧）"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#_4%E3%80%81%E5%88%86%E5%8C%BA%E5%AE%B9%E9%94%99%E6%80%A7-p%E4%BE%A7">#</a>4、分区容错性（P侧）</h3><p>大多数分布式系统都分布在多个子网络。每个子网络就叫做一个区（partition）。分区容错的意思是，区间通信可能失败。比如，一台服务器放在中国，另一台服务器放在美国，这就是两个区，它们之间可能无法通信。</p>
+<p>般来说，分区容错无法避免，因此可以认为 CAP 的 <code>P</code> 总是成立。CAP 定理告诉我们，剩下的 <code>C</code> 和 <code>A</code> 无法同时做到。</p>
+<h2 id="2、系统一致性"><a href="#2、系统一致性" class="headerlink" title="#2、系统一致性"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#_2%E3%80%81%E7%B3%BB%E7%BB%9F%E4%B8%80%E8%87%B4%E6%80%A7">#</a>2、系统一致性</h2><h3 id="1、基本要求"><a href="#1、基本要求" class="headerlink" title="#1、基本要求"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#_1%E3%80%81%E5%9F%BA%E6%9C%AC%E8%A6%81%E6%B1%82">#</a>1、基本要求</h3><p>规范的说，理想的分布式系统一致性应该满足：</p>
+<ol>
+<li>可终止性（Termination）：一致的结果在有限时间内能完成；</li>
+<li>共识性（Consensus）：不同节点最终完成决策的结果应该相同；</li>
+<li>合法性（Validity）：决策的结果必须是其它进程提出的提案。</li>
+</ol>
+<p>第一点很容易理解，这是计算机系统可以被使用的前提。需要注意，在现实生活中这点并不是总能得到保障的，例如取款机有时候会是 <code>服务中断</code> 状态，电话有时候是 <code>无法连通</code> 的。</p>
+<p>第二点看似容易，但是隐藏了一些潜在信息。算法考虑的是任意的情形，凡事一旦推广到任意情形，就往往有一些惊人的结果。例如现在就剩一张票了，中关村和西单的电影院也分别刚确认过这张票的存在，然后两个电影院同时来了一个顾客要买票，从各自观察看来，自己的顾客都是第一个到的……怎么能达成结果的共识呢？记住我们的唯一秘诀：<strong>核心在于需要把两件事情进行排序，而且这个顺序还得是合理的、大家都认可的</strong>。</p>
+<p>第三点看似绕口，但是其实比较容易理解，即达成的结果必须是节点执行操作的结果。仍以卖票为例，如果两个影院各自卖出去一千张，那么达成的结果就是还剩八千张，决不能认为票售光了。</p>
+<h3 id="2、强一致性"><a href="#2、强一致性" class="headerlink" title="#2、强一致性"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#_2%E3%80%81%E5%BC%BA%E4%B8%80%E8%87%B4%E6%80%A7">#</a>2、强一致性</h3><h4 id="线性一致性"><a href="#线性一致性" class="headerlink" title="#线性一致性"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#%E7%BA%BF%E6%80%A7%E4%B8%80%E8%87%B4%E6%80%A7">#</a>线性一致性</h4><p>线性一致性或称 <strong>原子一致性</strong> 或 <strong>严格一致性</strong> 指的是程序在执行的历史中在存在可线性化点P的执行模型，这意味着一个操作将在程序的调用和返回之间的某个点P起作用。这里“起作用”的意思是被系统中并发运行的所有其他线程所感知。要求如下：</p>
+<ol>
+<li><strong>写后读</strong> 这里写和读是两个操作，如果写操作在完成之后，读才开始，读要能读到最新的数据，而且保证以后也能读操作也都能读到这个最新的数据。</li>
+<li><strong>所有操作的时序与真实物理时间一致</strong>，要求即使不相关的两个操作，如果执行有先后顺序，线性一致性要求最终执行的结果也需要满足这个先后顺序。比如，操作序列(写A，读A，写B，读B)，那么不仅，读A，读B能读到最新A值和B值；而且要保证，如果读B读到最新值时，读A一定也能读到最新值，也就是需要保证执行时序与真实时序相同。</li>
+<li>如果两个操作是并发的（比如读A没有结束时，写B开始了），那么这个并发时序不确定，但从最终执行的结果来看，要确保所有线程(进程，节点)看到的执行序列是一致的。</li>
+</ol>
+<h4 id="顺序一致性"><a href="#顺序一致性" class="headerlink" title="#顺序一致性"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#%E9%A1%BA%E5%BA%8F%E4%B8%80%E8%87%B4%E6%80%A7">#</a>顺序一致性</h4><p>相比线性一致性，主要区别在于，<strong>对于物理上有先后顺序的操作，不保证这个时序</strong>。具体而言，对于单个线程，操作的顺序仍然要保留，对于多个线程(进程，节点)，执行的事件的先后顺序与物理时钟顺序不保证。但是要求，从执行结果来看，所有线程(进程，节点)看到的执行序列是一样的。</p>
+<h4 id="因果一致性"><a href="#因果一致性" class="headerlink" title="#因果一致性"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#%E5%9B%A0%E6%9E%9C%E4%B8%80%E8%87%B4%E6%80%A7">#</a>因果一致性</h4><p>因果一致性，被认为是比<code>顺序一致性</code>更弱的一致性，在因果一致性中，只对<strong>有因果关系的事件</strong>有顺序要求。</p>
+<h3 id="3、带约束的一致性"><a href="#3、带约束的一致性" class="headerlink" title="#3、带约束的一致性"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#_3%E3%80%81%E5%B8%A6%E7%BA%A6%E6%9D%9F%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7">#</a>3、带约束的一致性</h3><p>绝对理想的 <strong>强一致性（Strong Consistency）</strong> 代价很大。除非不发生任何故障，所有节点之间的通信无需任何时间，这个时候其实就等价于一台机器了。实际上，越强的一致性要求往往意味着越弱的性能、越低的可用性。</p>
+<p>强一致的系统往往比较难实现。很多时候，人们发现实际需求并没有那么强，可以适当放宽一致性要求，降低系统实现的难度。例如在一定约束下实现所谓 <strong>最终一致性（Eventual Consistency）</strong>，即总会存在一个时刻（而不是立刻），系统达到一致的状态，这对于大部分的 Web 系统来说已经足够了。这一类弱化的一致性，被笼统称为 <strong>弱一致性（Weak Consistency）</strong>。</p>
+<h4 id="最终一致性"><a href="#最终一致性" class="headerlink" title="#最终一致性"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7">#</a>最终一致性</h4><p>最终一致性也被称为 **乐观复制(optimistic replication)**，用户只能读到某次更新后的值，但系统保证数据将最终达到完全一致的状态，只是所需时间不能保障。这个达成一致所需要的时间，我们称为 <strong>窗口时间</strong>。</p>
+<p>我们常见的 <strong>异步复制的主从架构实现的是最终一致性</strong> 。它的一个典型常见是用户读取异步从库时，可能读取到较旧的信息，因为该从库尚未完全与主库同步。注意，同步复制的主从架构会出现任一节点宕机导致的单点问题。</p>
+<h3 id="4、一致性（Consistency）与共识（Consensus）的关系"><a href="#4、一致性（Consistency）与共识（Consensus）的关系" class="headerlink" title="#4、一致性（Consistency）与共识（Consensus）的关系"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#_4%E3%80%81%E4%B8%80%E8%87%B4%E6%80%A7-consistency-%E4%B8%8E%E5%85%B1%E8%AF%86-consensus-%E7%9A%84%E5%85%B3%E7%B3%BB">#</a>4、一致性（Consistency）与共识（Consensus）的关系</h3><p>我们常说的 <strong>一致性（Consistency）</strong> 在分布式系统中指的是 <code>副本（Replication）</code> 问题中对于同一个数据的多个副本，其对外表现的数据一致性，如 <code>线性一致性</code> 、<code>因果一致性</code>、<code>最终一致性</code>等，都是用来描述副本问题中的一致性的。</p>
+<p>而 <strong>共识（Consensus）</strong> 则不同，共识问题中所有的节点要最终达成共识，由于最终目标是所有节点都要达成一致，所以根本 <strong>不存在一致性强弱</strong> 之分。</p>
+<p><img src="/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1.assets/202206222244561.png" alt="img"> <img src="/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1.assets/202206222244409.png" alt="img"></p>
+<h2 id="3、高并发系统的设计"><a href="#3、高并发系统的设计" class="headerlink" title="#3、高并发系统的设计"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#_3%E3%80%81%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%AE%BE%E8%AE%A1">#</a>3、高并发系统的设计</h2><h3 id="1、系统拆分"><a href="#1、系统拆分" class="headerlink" title="#1、系统拆分"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#_1%E3%80%81%E7%B3%BB%E7%BB%9F%E6%8B%86%E5%88%86">#</a>1、系统拆分</h3><p>将一个系统拆分为多个子系统，用 RPC 来搞。然后每个系统连一个数据库，这样本来就一个库，现在多个数据库，不也可以扛高并发么。</p>
+<h3 id="2、缓存"><a href="#2、缓存" class="headerlink" title="#2、缓存"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#_2%E3%80%81%E7%BC%93%E5%AD%98">#</a>2、缓存</h3><p>大部分的高并发场景，都是读多写少，那你完全可以在数据库和缓存里都写一份，然后读的时候大量走缓存不就得了。毕竟 Redis 轻轻松松单机几万的并发。所以你可以考虑考虑你的项目里，那些承载主要请求的读场景，怎么用缓存来抗高并发。</p>
+<h3 id="3、消息队列"><a href="#3、消息队列" class="headerlink" title="#3、消息队列"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#_3%E3%80%81%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97">#</a>3、消息队列</h3><p>可能你还是会出现高并发写的场景，比如说一个业务操作里要频繁搞数据库几十次，增删改增删改。那高并发绝对搞挂你的系统，你要是用 Redis 来承载写那肯定不行，人家是缓存，数据随时就被 LRU 了，数据格式还无比简单，没有事务支持。所以该用 MySQL 还得用 MySQL 啊。那你咋办？用 MQ 吧，大量的写请求灌入 MQ 里，后边系统消费后慢慢写，控制在 MySQL 承载范围之内。所以你得考虑考虑你的项目里，那些承载复杂写业务逻辑的场景里，如何用 MQ 来异步写，提升并发性。</p>
+<h3 id="4、分库分表"><a href="#4、分库分表" class="headerlink" title="#4、分库分表"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#_4%E3%80%81%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8">#</a>4、分库分表</h3><p>分库分表，可能到了最后数据库层面还是免不了抗高并发的要求，好吧，那么就将一个数据库拆分为多个库，多个库来扛更高的并发；然后将一个表拆分为多个表，每个表的数据量保持少一点，提高 SQL 跑的性能。</p>
+<h3 id="5、读写分离"><a href="#5、读写分离" class="headerlink" title="#5、读写分离"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html#_5%E3%80%81%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB">#</a>5、读写分离</h3><p>读写分离，这个就是说大部分时候数据库可能也是读多写少，没必要所有请求都集中在一个库上吧，可以搞个主从架构，主库写入，从库读取，搞一个读写分离。读流量太多的时候，还可以加更多的从库。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>原创技术分享，您的支持将鼓励我继续创作</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="wFei 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="wFei 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>wFei
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://holdustogether.github.io/2022/09/21/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A101/" title="系统设计-分布式高并发">https://holdustogether.github.io/2022/09/21/系统设计01/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" rel="tag"># 系统设计</a>
+              <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag"># 分布式</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/09/21/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103/" rel="prev" title="系统设计-Raft">
+      <i class="fa fa-chevron-left"></i> 系统设计-Raft
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1-%E5%88%86%E5%B8%83%E5%BC%8F%E9%AB%98%E5%B9%B6%E5%8F%91"><span class="nav-number">1.</span> <span class="nav-text">系统设计-分布式高并发</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.1.</span> <span class="nav-text">1、分布式系统基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81CAP%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80"><span class="nav-number">1.1.1.</span> <span class="nav-text">1、CAP理论基础</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7%EF%BC%88C%E4%BE%A7%EF%BC%89"><span class="nav-number">1.1.2.</span> <span class="nav-text">2、数据一致性（C侧）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E8%87%B4%E6%80%A7%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">一致性解决方案</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E6%9C%8D%E5%8A%A1%E5%8F%AF%E7%94%A8%E6%80%A7%EF%BC%88A%E4%BE%A7%EF%BC%89"><span class="nav-number">1.1.3.</span> <span class="nav-text">3、服务可用性（A侧）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%AB%98%E5%8F%AF%E7%94%A8%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">高可用解决方案</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4%E3%80%81%E5%88%86%E5%8C%BA%E5%AE%B9%E9%94%99%E6%80%A7%EF%BC%88P%E4%BE%A7%EF%BC%89"><span class="nav-number">1.1.4.</span> <span class="nav-text">4、分区容错性（P侧）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81%E7%B3%BB%E7%BB%9F%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">1.2.</span> <span class="nav-text">2、系统一致性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E5%9F%BA%E6%9C%AC%E8%A6%81%E6%B1%82"><span class="nav-number">1.2.1.</span> <span class="nav-text">1、基本要求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E5%BC%BA%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">1.2.2.</span> <span class="nav-text">2、强一致性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">线性一致性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A1%BA%E5%BA%8F%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">顺序一致性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%A0%E6%9E%9C%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">因果一致性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E5%B8%A6%E7%BA%A6%E6%9D%9F%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">1.2.3.</span> <span class="nav-text">3、带约束的一致性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">最终一致性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4%E3%80%81%E4%B8%80%E8%87%B4%E6%80%A7%EF%BC%88Consistency%EF%BC%89%E4%B8%8E%E5%85%B1%E8%AF%86%EF%BC%88Consensus%EF%BC%89%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">1.2.4.</span> <span class="nav-text">4、一致性（Consistency）与共识（Consensus）的关系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%E3%80%81%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.3.</span> <span class="nav-text">3、高并发系统的设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E7%B3%BB%E7%BB%9F%E6%8B%86%E5%88%86"><span class="nav-number">1.3.1.</span> <span class="nav-text">1、系统拆分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E7%BC%93%E5%AD%98"><span class="nav-number">1.3.2.</span> <span class="nav-text">2、缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97"><span class="nav-number">1.3.3.</span> <span class="nav-text">3、消息队列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4%E3%80%81%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8"><span class="nav-number">1.3.4.</span> <span class="nav-text">4、分库分表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5%E3%80%81%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB"><span class="nav-number">1.3.5.</span> <span class="nav-text">5、读写分离</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="wFei"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">wFei</p>
+  <div class="site-description" itemprop="description">不要停止成为更好的自己</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/holdustogether" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;holdustogether" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/wf1657885988@163.com" title="E-Mail → wf1657885988@163.com"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+	<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=450 src="//music.163.com/outchain/player?type=0&id=7614662893&auto=1&height=430"></iframe>
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022.08 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wFei</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">博客全站共65.1k字</span>
+</div>
+
+    <div>
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+    </div>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='128,136,147' opacity='0.8' zIndex='-1' count='150' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  <!-- ҳ����С���� -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>

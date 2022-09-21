@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"holdustogether.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="分布式缓存、锁以及事务">
+<meta property="og:type" content="article">
+<meta property="og:title" content="系统设计-分布式缓存、锁以及事务">
+<meta property="og:url" content="https://holdustogether.github.io/2022/09/21/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A102/index.html">
+<meta property="og:site_name" content="南北橘子">
+<meta property="og:description" content="分布式缓存、锁以及事务">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-09-21T02:57:32.134Z">
+<meta property="article:modified_time" content="2022-09-21T03:49:31.815Z">
+<meta property="article:author" content="wFei">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="系统设计">
+<meta property="article:tag" content="分布式">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://holdustogether.github.io/2022/09/21/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A102/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>系统设计-分布式缓存、锁以及事务 | 南北橘子</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/rss2.xml" title="南北橘子" type="application/rss+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/holdustogether" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">南北橘子</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://holdustogether.github.io/2022/09/21/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A102/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="wFei">
+      <meta itemprop="description" content="不要停止成为更好的自己">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="南北橘子">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          系统设计-分布式缓存、锁以及事务
+        </h1>
+
+        <div class="post-meta">
+	  
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-09-21 10:57:32 / 修改时间：11:49:31" itemprop="dateCreated datePublished" datetime="2022-09-21T10:57:32+08:00">2022-09-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">系统设计</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="分布式缓存、锁以及事务"><a href="#分布式缓存、锁以及事务" class="headerlink" title="分布式缓存、锁以及事务"></a>分布式缓存、锁以及事务</h1><span id="more"></span>
+
+<p>引用自**[阿秀的学习笔记](<a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html">系统设计01-03 | 阿秀的学习笔记 (interviewguide.cn)</a>)**！只为个人学习方便。如有侵权，立刻删除。</p>
+<h2 id="1、分布式缓存"><a href="#1、分布式缓存" class="headerlink" title="1、分布式缓存"></a>1、分布式缓存</h2><h3 id="1、应用场景"><a href="#1、应用场景" class="headerlink" title="#1、应用场景"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-02-distribution.html#_1%E3%80%81%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF">#</a>1、应用场景</h3><ol>
+<li><strong>页面缓存</strong>：用来缓存Web 页面的内容片段,包括HTML、CSS 和图片等;</li>
+<li><strong>应用对象缓存</strong>：缓存系统作为ORM 框架的二级缓存对外提供服务,目的是减轻数据库的负载压力,加速应用访问;解决分布式Web部署的 session 同步问题，状态缓存.缓存包括Session 会话状态及应用横向扩展时的状态数据等,这类数据一般是难以恢复的,对可用性要求较高,多应用于高可用集群。</li>
+<li><strong>并行处理</strong>：通常涉及大量中间计算结果需要共享;</li>
+<li><strong>云计算领域提供分布式缓存服务</strong></li>
+</ol>
+<h3 id="2、缓存雪崩"><a href="#2、缓存雪崩" class="headerlink" title="#2、缓存雪崩"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-02-distribution.html#_2%E3%80%81%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9">#</a>2、缓存雪崩</h3><p>缓存雪崩我们可以简单的理解为：由于原有缓存失效、新缓存未到之间(<strong>例如：我们设置缓存时采用了相同的过期时间，在同一时刻出现大面积的缓存过期</strong>)，所有原本应该访问缓存的请求都去查询数据库了，而对数据库CPU和内存造成巨大压力，严重的会造成数据库宕机。从而形成一系列连锁反应，造成整个系统崩溃。</p>
+<h3 id="3、缓存穿透"><a href="#3、缓存穿透" class="headerlink" title="#3、缓存穿透"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-02-distribution.html#_3%E3%80%81%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F">#</a>3、缓存穿透</h3><p>缓存穿透是指用户查询数据，在数据库没有，自然在缓存中也不会有。<strong>这样就导致用户查询的时候，在缓存中找不到，每次都要去数据库再查询一遍，然后返回空</strong>（<em>相当于进行了两次无用的查询</em>）。这样请求就绕过缓存直接查数据库，这也是经常提的缓存命中率问题。</p>
+<h3 id="4、缓存预热"><a href="#4、缓存预热" class="headerlink" title="#4、缓存预热"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-02-distribution.html#_4%E3%80%81%E7%BC%93%E5%AD%98%E9%A2%84%E7%83%AD">#</a>4、缓存预热</h3><p>缓存预热这个应该是一个比较常见的概念，相信很多小伙伴都应该可以很容易的理解，缓存预热就是系统上线后，将相关的缓存数据直接加载到缓存系统。这样就可以避免在用户请求的时候，先查询数据库，然后再将数据缓存的问题！用户直接查询事先被预热的缓存数据！</p>
+<h3 id="5、缓存更新"><a href="#5、缓存更新" class="headerlink" title="#5、缓存更新"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-02-distribution.html#_5%E3%80%81%E7%BC%93%E5%AD%98%E6%9B%B4%E6%96%B0">#</a>5、缓存更新</h3><p>除了缓存服务器自带的缓存失效策略之外，我们还可以根据具体的业务需求进行自定义的缓存淘汰，常见的策略有两种：</p>
+<ol>
+<li>定时去清理过期的缓存；</li>
+<li>当有用户请求过来时，再判断这个请求所用到的缓存是否过期，过期的话就去底层系统得到新数据并更新缓存。</li>
+</ol>
+<p>两者各有优劣，第一种的缺点是维护大量缓存的key是比较麻烦的，第二种的缺点就是每次用户请求过来都要判断缓存失效，逻辑相对比较复杂！具体用哪种方案，大家可以根据自己的应用场景来权衡。</p>
+<h3 id="6、缓存降级"><a href="#6、缓存降级" class="headerlink" title="#6、缓存降级"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-02-distribution.html#_6%E3%80%81%E7%BC%93%E5%AD%98%E9%99%8D%E7%BA%A7">#</a>6、缓存降级</h3><p>当访问量剧增、服务出现问题（如响应时间慢或不响应）或非核心服务影响到核心流程的性能时，仍然需要保证服务还是可用的，即使是有损服务。系统可以根据一些关键数据进行自动降级，也可以配置开关实现人工降级。</p>
+<p>降级的最终目的是 <strong>保证核心服务可用，即使是有损的</strong>。而且有些服务是无法降级的（如加入购物车、结算）。</p>
+<p>在进行降级之前要对系统进行梳理，看看系统是不是可以丢卒保帅；从而梳理出哪些必须誓死保护，哪些可降级；比如可以参考日志级别设置预案：</p>
+<ol>
+<li><strong>一般</strong>：比如有些服务偶尔因为网络抖动或者服务正在上线而超时，可以自动降级；</li>
+<li><strong>警告</strong>：有些服务在一段时间内成功率有波动（如在95~100%之间），可以自动降级或人工降级，并发送告警；</li>
+<li><strong>错误</strong>：比如可用率低于90%，或者数据库连接池被打爆了，或者访问量突然猛增到系统能承受的最大阀值，此时可以根据情况自动降级或者人工降级；</li>
+<li><strong>严重错误</strong>：比如因为特殊原因数据错误了，此时需要紧急人工降级。</li>
+</ol>
+<h2 id="2、分布式锁"><a href="#2、分布式锁" class="headerlink" title="#2、分布式锁"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-02-distribution.html#_2%E3%80%81%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81">#</a>2、分布式锁</h2><h3 id="1、Redis-的-RedLock-锁"><a href="#1、Redis-的-RedLock-锁" class="headerlink" title="#1、Redis 的 RedLock 锁"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-02-distribution.html#_1%E3%80%81redis-%E7%9A%84-redlock-%E9%94%81">#</a>1、Redis 的 RedLock 锁</h3><p>为了解决 Redis 单点的问题。 Redis 的作者提出了 RedLock 的解决方案。方案非常的巧妙和简洁。 RedLock 的核心思想就是，<strong>同时使用多个 Redis Master 来冗余，且这些节点都是完全的独立的，也不需要对这些节点之间的数据进行同步</strong>。</p>
+<p>假设我们有N个Redis节点，N应该是一个大于2的奇数。RedLock的实现步骤:</p>
+<ol>
+<li>取得当前时间</li>
+<li>使用单节点获取锁的方式，依次获取 N 个节点的 Redis 锁。</li>
+<li>如果获取到的锁的数量大于 N&#x2F;2+1<em>N</em>&#x2F;2+1 个，且获取的时间小于锁的有效时间(lock validity time)就认为获取到了一个有效的锁，锁自动释放时间就是最初的锁释放时间减去之前获取锁所消耗的时间。</li>
+<li>如果获取锁的数量小于 N&#x2F;2+1<em>N</em>&#x2F;2+1 ，或者在锁的有效时间(lock validity time)内没有获取到足够的锁，就认为获取锁失败，这个时候需要向所有节点发送释放锁的消息。</li>
+</ol>
+<p>对于释放锁的实现就很简单了，向所有的 Redis 节点发起释放的操作，无论之前是否获取锁成功。</p>
+<h3 id="2、基于-ZooKeeper-的分布式锁"><a href="#2、基于-ZooKeeper-的分布式锁" class="headerlink" title="#2、基于 ZooKeeper 的分布式锁"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-02-distribution.html#_2%E3%80%81%E5%9F%BA%E4%BA%8E-zookeeper-%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81">#</a>2、基于 ZooKeeper 的分布式锁</h3><h4 id="方案"><a href="#方案" class="headerlink" title="#方案"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-02-distribution.html#%E6%96%B9%E6%A1%88">#</a>方案</h4><p>基于 ZK 的特性，很容易得出使用 ZK 实现分布式锁的落地方案：</p>
+<ol>
+<li>使用 ZK 的临时节点和有序节点，每个线程获取锁就是在 ZK 创建一个临时有序的节点，比如在 <code>/lock/</code> 目录下。</li>
+<li>创建节点成功后，获取 <code>/lock</code> 目录下的所有临时节点，再判断当前线程创建的节点是否是所有的节点的序号最小的节点。</li>
+<li>如果当前线程创建的节点是所有节点序号最小的节点，则认为获取锁成功。</li>
+<li>如果当前线程创建的节点不是所有节点序号最小的节点，则对节点序号的 <strong>前一个节点</strong> 添加一个事件监听。</li>
+</ol>
+<h4 id="缺陷"><a href="#缺陷" class="headerlink" title="#缺陷"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-02-distribution.html#%E7%BC%BA%E9%99%B7">#</a>缺陷</h4><ol>
+<li><strong>羊群效应</strong>：当一个节点变化时，会触发大量的 <code>watches</code> 事件，导致集群响应变慢。每个节点尽量少的 <code>watches</code>，这里就只注册 <strong>前一个节点</strong> 的监听</li>
+<li>ZK 集群的读写吞吐量不高</li>
+<li>网络抖动可能导致 Session 离线，锁被释放</li>
+</ol>
+<h2 id="3、分布式事务"><a href="#3、分布式事务" class="headerlink" title="#3、分布式事务"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-02-distribution.html#_3%E3%80%81%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1">#</a>3、分布式事务</h2><h3 id="1、2PC-x2F-XA方案"><a href="#1、2PC-x2F-XA方案" class="headerlink" title="#1、2PC&#x2F;XA方案"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-02-distribution.html#_1%E3%80%812pc-xa%E6%96%B9%E6%A1%88">#</a>1、2PC&#x2F;XA方案</h3><p>所谓的 XA 方案，即：两阶段提交，有一个事务管理器的概念，负责协调多个数据库（资源管理器）的事务，事务管理器先问问各个数据库你准备好了吗？如果每个数据库都回复 ok，那么就正式提交事务，在各个数据库上执行操作；如果任何其中一个数据库回答不 ok，那么就回滚事务。</p>
+<p>这种分布式事务方案，比较适合单块应用里，跨多个库的分布式事务，而且因为严重依赖于数据库层面来搞定复杂的事务，效率很低，绝对不适合高并发的场景。</p>
+<p>一般来说某个系统内部如果出现跨多个库的这么一个操作，是不合规的。如果你要操作别人的服务的库，你必须是通过调用别的服务的接口来实现，绝对不允许交叉访问别人的数据库。</p>
+<h3 id="2、TCC强一致性方案"><a href="#2、TCC强一致性方案" class="headerlink" title="#2、TCC强一致性方案"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-02-distribution.html#_2%E3%80%81tcc%E5%BC%BA%E4%B8%80%E8%87%B4%E6%80%A7%E6%96%B9%E6%A1%88">#</a>2、TCC强一致性方案</h3><p>TCC 的全称是：<code>Try</code>、<code>Confirm</code>、<code>Cancel</code>。</p>
+<ul>
+<li><strong>Try 阶段</strong>：这个阶段说的是对各个服务的资源做检测以及对资源进行 <strong>锁定或者预留</strong>。</li>
+<li><strong>Confirm 阶段</strong>：这个阶段说的是在各个服务中执行实际的操作。</li>
+<li><strong>Cancel 阶段</strong>：如果任何一个服务的业务方法执行出错，那么这里就需要 <strong>进行补偿</strong>，就是执行已经执行成功的业务逻辑的回滚操作。（把那些执行成功的回滚）</li>
+</ul>
+<p>这种方案说实话几乎很少人使用，但是也有使用的场景。因为这个<strong>事务回滚实际上是严重依赖于你自己写逻辑来实现回滚和补偿</strong>，会造成巨大的补偿代码量。</p>
+<h3 id="3、可靠消息最终一致性方案"><a href="#3、可靠消息最终一致性方案" class="headerlink" title="#3、可靠消息最终一致性方案"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-02-distribution.html#_3%E3%80%81%E5%8F%AF%E9%9D%A0%E6%B6%88%E6%81%AF%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E6%96%B9%E6%A1%88">#</a>3、可靠消息最终一致性方案</h3><p>基于 MQ 来实现事务。比如阿里的 RocketMQ 就支持消息事务。大概的意思就是：</p>
+<ol>
+<li>A 系统先发送一个 prepared 消息到 MQ，如果这个 prepared 消息发送失败那么就直接取消操作别执行了；</li>
+<li>如果这个消息发送成功过了，那么接着执行本地事务，如果成功就告诉 MQ 发送确认消息，如果失败就告诉 MQ 回滚消息；</li>
+<li>如果发送了确认消息，那么此时 B 系统会接收到确认消息，然后执行本地的事务；</li>
+<li>mq 会自动定时轮询所有 prepared 消息回调你的接口，问你，这个消息是不是本地事务处理失败了，所有没发送确认的消息，是继续重试还是回滚？一般来说这里你就可以查下数据库看之前本地事务是否执行，如果回滚了，那么这里也回滚吧。这个就是避免可能本地事务执行成功了，而确认消息却发送失败了。</li>
+<li>这个方案里，要是系统 B 的事务失败了咋办？重试咯，自动不断重试直到成功，如果实在是不行，要么就是针对重要的资金类业务进行回滚，比如 B 系统本地回滚后，想办法通知系统 A 也回滚；或者是发送报警由人工来手工回滚和补偿。</li>
+</ol>
+<h3 id="4、最大努力通知方案"><a href="#4、最大努力通知方案" class="headerlink" title="#4、最大努力通知方案"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-02-distribution.html#_4%E3%80%81%E6%9C%80%E5%A4%A7%E5%8A%AA%E5%8A%9B%E9%80%9A%E7%9F%A5%E6%96%B9%E6%A1%88">#</a>4、最大努力通知方案</h3><ol>
+<li>系统 A 本地事务执行完之后，发送个消息到 MQ；</li>
+<li>这里会有个专门消费 MQ 的最大努力通知服务，这个服务会消费 MQ 然后写入数据库中记录下来，或者是放入个内存队列也可以，接着调用系统 B 的接口；</li>
+<li>要是系统 B 执行成功就 ok 了；要是系统 B 执行失败了，那么最大努力通知服务就定时尝试重新调用系统 B，反复 N 次，最后还是不行就放弃。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>原创技术分享，您的支持将鼓励我继续创作</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="wFei 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="wFei 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>wFei
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://holdustogether.github.io/2022/09/21/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A102/" title="系统设计-分布式缓存、锁以及事务">https://holdustogether.github.io/2022/09/21/系统设计02/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" rel="tag"># 系统设计</a>
+              <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag"># 分布式</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/09/12/%E9%9D%A2%E8%AF%95%E6%8A%80%E5%B7%A7/" rel="prev" title="面试技巧">
+      <i class="fa fa-chevron-left"></i> 面试技巧
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/09/21/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103/" rel="next" title="系统设计-Raft">
+      系统设计-Raft <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E7%BC%93%E5%AD%98%E3%80%81%E9%94%81%E4%BB%A5%E5%8F%8A%E4%BA%8B%E5%8A%A1"><span class="nav-number">1.</span> <span class="nav-text">分布式缓存、锁以及事务</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81%E5%88%86%E5%B8%83%E5%BC%8F%E7%BC%93%E5%AD%98"><span class="nav-number">1.1.</span> <span class="nav-text">1、分布式缓存</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.1.1.</span> <span class="nav-text">1、应用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9"><span class="nav-number">1.1.2.</span> <span class="nav-text">2、缓存雪崩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F"><span class="nav-number">1.1.3.</span> <span class="nav-text">3、缓存穿透</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4%E3%80%81%E7%BC%93%E5%AD%98%E9%A2%84%E7%83%AD"><span class="nav-number">1.1.4.</span> <span class="nav-text">4、缓存预热</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5%E3%80%81%E7%BC%93%E5%AD%98%E6%9B%B4%E6%96%B0"><span class="nav-number">1.1.5.</span> <span class="nav-text">5、缓存更新</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6%E3%80%81%E7%BC%93%E5%AD%98%E9%99%8D%E7%BA%A7"><span class="nav-number">1.1.6.</span> <span class="nav-text">6、缓存降级</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81"><span class="nav-number">1.2.</span> <span class="nav-text">2、分布式锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81Redis-%E7%9A%84-RedLock-%E9%94%81"><span class="nav-number">1.2.1.</span> <span class="nav-text">1、Redis 的 RedLock 锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E5%9F%BA%E4%BA%8E-ZooKeeper-%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81"><span class="nav-number">1.2.2.</span> <span class="nav-text">2、基于 ZooKeeper 的分布式锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%B9%E6%A1%88"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%BA%E9%99%B7"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">缺陷</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%E3%80%81%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1"><span class="nav-number">1.3.</span> <span class="nav-text">3、分布式事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%812PC-x2F-XA%E6%96%B9%E6%A1%88"><span class="nav-number">1.3.1.</span> <span class="nav-text">1、2PC&#x2F;XA方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81TCC%E5%BC%BA%E4%B8%80%E8%87%B4%E6%80%A7%E6%96%B9%E6%A1%88"><span class="nav-number">1.3.2.</span> <span class="nav-text">2、TCC强一致性方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E5%8F%AF%E9%9D%A0%E6%B6%88%E6%81%AF%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E6%96%B9%E6%A1%88"><span class="nav-number">1.3.3.</span> <span class="nav-text">3、可靠消息最终一致性方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4%E3%80%81%E6%9C%80%E5%A4%A7%E5%8A%AA%E5%8A%9B%E9%80%9A%E7%9F%A5%E6%96%B9%E6%A1%88"><span class="nav-number">1.3.4.</span> <span class="nav-text">4、最大努力通知方案</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="wFei"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">wFei</p>
+  <div class="site-description" itemprop="description">不要停止成为更好的自己</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/holdustogether" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;holdustogether" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/wf1657885988@163.com" title="E-Mail → wf1657885988@163.com"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+	<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=450 src="//music.163.com/outchain/player?type=0&id=7614662893&auto=1&height=430"></iframe>
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022.08 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wFei</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">博客全站共65.1k字</span>
+</div>
+
+    <div>
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+    </div>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='128,136,147' opacity='0.8' zIndex='-1' count='150' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  <!-- ҳ����С���� -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>

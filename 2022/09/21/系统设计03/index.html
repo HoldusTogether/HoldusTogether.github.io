@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"holdustogether.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Raft引用自**[阿秀的学习笔记](系统设计01-03 | 阿秀的学习笔记 (interviewguide.cn))**！只为个人学习方便。如有侵权，立刻删除。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="系统设计-Raft">
+<meta property="og:url" content="https://holdustogether.github.io/2022/09/21/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103/index.html">
+<meta property="og:site_name" content="南北橘子">
+<meta property="og:description" content="Raft引用自**[阿秀的学习笔记](系统设计01-03 | 阿秀的学习笔记 (interviewguide.cn))**！只为个人学习方便。如有侵权，立刻删除。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://holdustogether.github.io/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245852.png">
+<meta property="og:image" content="https://holdustogether.github.io/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245446.png">
+<meta property="og:image" content="https://holdustogether.github.io/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245368.png">
+<meta property="og:image" content="https://holdustogether.github.io/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245321.png">
+<meta property="og:image" content="https://holdustogether.github.io/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245795.png">
+<meta property="og:image" content="https://holdustogether.github.io/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245235.png">
+<meta property="og:image" content="https://holdustogether.github.io/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245788.png">
+<meta property="og:image" content="https://holdustogether.github.io/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245777.png">
+<meta property="og:image" content="https://holdustogether.github.io/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245596.png">
+<meta property="og:image" content="https://holdustogether.github.io/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245472.png">
+<meta property="article:published_time" content="2022-09-21T03:49:42.571Z">
+<meta property="article:modified_time" content="2022-09-21T03:57:36.104Z">
+<meta property="article:author" content="wFei">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="系统设计">
+<meta property="article:tag" content="Raft">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://holdustogether.github.io/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245852.png">
+
+<link rel="canonical" href="https://holdustogether.github.io/2022/09/21/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>系统设计-Raft | 南北橘子</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/rss2.xml" title="南北橘子" type="application/rss+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/holdustogether" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">南北橘子</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://holdustogether.github.io/2022/09/21/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="wFei">
+      <meta itemprop="description" content="不要停止成为更好的自己">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="南北橘子">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          系统设计-Raft
+        </h1>
+
+        <div class="post-meta">
+	  
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-09-21 11:49:42 / 修改时间：11:57:36" itemprop="dateCreated datePublished" datetime="2022-09-21T11:49:42+08:00">2022-09-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">系统设计</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Raft"><a href="#Raft" class="headerlink" title="Raft"></a>Raft</h1><p>引用自**[阿秀的学习笔记](<a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-01-distribution.html">系统设计01-03 | 阿秀的学习笔记 (interviewguide.cn)</a>)**！只为个人学习方便。如有侵权，立刻删除。</p>
+<span id="more"></span>
+
+<h2 id="1、Raft-Overview"><a href="#1、Raft-Overview" class="headerlink" title="1、Raft Overview"></a>1、Raft Overview</h2><blockquote>
+<p>Raft 算法讲解</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">raft 是工程上使用较为广泛的强一致性、去中心化、高可用的分布式协议。在这里强调了是在工程上，因为在学术理论界，最耀眼的还是大名鼎鼎的 Paxos。但 Paxos 是：少数真正理解的人觉得简单，尚未理解的人觉得很难，大多数人都是一知半解。本人也花了很多时间、看了很多材料也没有真正理解。直到看到 raft 的论文，两位研究者也提到，他们也花了很长的时间来理解 Paxos，他们也觉得很难理解，于是研究出了 raft 算法。</span><br><span class="line"></span><br><span class="line">       @阿秀: 代码已成功复制到剪贴板</span><br><span class="line">   </span><br></pre></td></tr></table></figure>
+
+<p> raft 是一个共识算法（consensus algorithm），所谓共识，就是多个节点对某个事情达成一致的看法，即使是在部分节点故障、网络延时、网络分割的情况下。这些年最为火热的加密货币（比特币、区块链）就需要共识算法，而在分布式系统中，共识算法更多用于提高系统的容错性，比如分布式存储中的复制集（replication），在<a target="_blank" rel="noopener" href="https://www.cnblogs.com/xybaby/p/7153755.html">带着问题学习分布式系统之中心化复制集 (opens new window)</a>一文中介绍了中心化复制集的相关知识。raft 协议就是一种 leader-based 的共识算法，与之相应的是 leaderless 的共识算法。</p>
+<p>Raft 算法的头号目标就是容易理解（UnderStandable），这从论文的标题就可以看出来。当然，Raft 增强了可理解性，在性能、可靠性、可用性方面是不输于 Paxos 的。</p>
+<blockquote>
+<p>Raft more understandable than Paxos and also provides a better foundation for building practical systems</p>
+</blockquote>
+<p>为了达到易于理解的目标，raft 做了很多努力，其中最主要是两件事情：</p>
+<ul>
+<li>问题分解</li>
+<li>状态简化</li>
+</ul>
+<p>问题分解是将 “复制集中节点一致性” 这个复杂的问题划分为数个可以被独立解释、理解、解决的子问题。在 raft，子问题包括，<em>leader election</em>， <em>log replication</em>，<em>safety</em>，<em>membership changes</em>。而状态简化更好理解，就是对算法做出一些限制，减少需要考虑的状态数，使得算法更加清晰，更少的不确定性（比如，保证新选举出来的 leader 会包含所有 commited log entry）</p>
+<blockquote>
+<p>Raft implements consensus by first electing a distinguished leader, then giving the leader complete responsibility for managing the replicated log. The leader accepts log entries from clients, replicates them on other servers, and tells servers when it is safe to apply log entries to their state machines. A leader can fail or become disconnected from the other servers, in which case a new leader is elected.</p>
+</blockquote>
+<p>上面的引文对 raft 协议的工作原理进行了高度的概括：raft 会先选举出 leader，leader 完全负责 replicated log 的管理。leader 负责接受所有客户端更新请求，然后复制到 follower 节点，并在 “安全” 的时候执行这些请求。如果 leader 故障，followes 会重新选举出新的 leader。</p>
+<p>这就涉及到 raft 最新的两个子问题： leader election 和 log replication</p>
+<h2 id="2、leader-election"><a href="#2、leader-election" class="headerlink" title="#2、leader election"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-03-distribution.html#_2%E3%80%81leader-election">#</a>2、leader election</h2><p>raft 协议中，一个节点任一时刻处于以下三个状态之一：</p>
+<ul>
+<li>leader</li>
+<li>follower</li>
+<li>candidate</li>
+</ul>
+<p>给出状态转移图能很直观的直到这三个状态的区别<br><img src="/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245852.png" alt="img"></p>
+<p>可以看出所有节点启动时都是 follower 状态；在一段时间内如果没有收到来自 leader 的心跳，从 follower 切换到 candidate，发起选举；如果收到 majority 的造成票（含自己的一票）则切换到 leader 状态；如果发现其他节点比自己更新，则主动切换到 follower。</p>
+<p>总之，系统中最多只有一个 leader，如果在一段时间里发现没有 leader，则大家通过选举 - 投票选出 leader。leader 会不停的给 follower 发心跳消息，表明自己的存活状态。如果 leader 故障，那么 follower 会转换成 candidate，重新选出 leader。</p>
+<h3 id="term"><a href="#term" class="headerlink" title="#term"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-03-distribution.html#term">#</a>term</h3><p>从上面可以看出，哪个节点做 leader 是大家投票选举出来的，每个 leader 工作一段时间，然后选出新的 leader 继续负责。这根民主社会的选举很像，每一届新的履职期称之为一届任期，在 raft 协议中，也是这样的，对应的术语叫 <em><strong>term</strong></em>。<br><img src="/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245446.png" alt="img"></p>
+<p>term（任期）以选举（election）开始，然后就是一段或长或短的稳定工作期（normal Operation）。从上图可以看到，任期是递增的，这就充当了逻辑时钟的作用；另外，term 3 展示了一种情况，就是说没有选举出 leader 就结束了，然后会发起新的选举，后面会解释这种 <em>split vote</em> 的情况。</p>
+<h3 id="选举过程详解"><a href="#选举过程详解" class="headerlink" title="#选举过程详解"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-03-distribution.html#%E9%80%89%E4%B8%BE%E8%BF%87%E7%A8%8B%E8%AF%A6%E8%A7%A3">#</a>选举过程详解</h3><p>上面已经说过，如果 follower 在 <em>election timeout</em> 内没有收到来自 leader 的心跳，（也许此时还没有选出 leader，大家都在等；也许 leader 挂了；也许只是 leader 与该 follower 之间网络故障），则会主动发起选举。步骤如下：</p>
+<ul>
+<li>增加节点本地的 <em>current term</em> ，切换到 candidate 状态</li>
+<li>投自己一票</li>
+<li>并行给其他节点发送 <em>RequestVote RPCs</em></li>
+<li>等待其他节点的回复</li>
+</ul>
+<p>在这个过程中，根据来自其他节点的消息，可能出现三种结果</p>
+<ol>
+<li>收到 majority 的投票（含自己的一票），则赢得选举，成为 leader</li>
+<li>被告知别人已当选，那么自行切换到 follower</li>
+<li>一段时间内没有收到 majority 投票，则保持 candidate 状态，重新发出选举</li>
+</ol>
+<p>第一种情况，赢得了选举之后，新的 leader 会立刻给所有节点发消息，广而告之，避免其余节点触发新的选举。在这里，先回到投票者的视角，投票者如何决定是否给一个选举请求投票呢，有以下约束：</p>
+<ul>
+<li>在任一任期内，单个节点最多只能投一票</li>
+<li>候选人知道的信息不能比自己的少（这一部分，后面介绍 log replication 和 safety 的时候会详细介绍）</li>
+<li>first-come-first-served 先来先得</li>
+</ul>
+<p>第二种情况，比如有三个节点 A B C。A B 同时发起选举，而 A 的选举消息先到达 C，C 给 A 投了一票，当 B 的消息到达 C 时，已经不能满足上面提到的第一个约束，即 C 不会给 B 投票，而 A 和 B 显然都不会给对方投票。A 胜出之后，会给 B,C 发心跳消息，节点 B 发现节点 A 的 term 不低于自己的 term，知道有已经有 Leader 了，于是转换成 follower。</p>
+<p>第三种情况，没有任何节点获得 majority 投票，比如下图这种情况：<br><img src="/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245368.png" alt="img"></p>
+<p>总共有四个节点，Node C、Node D 同时成为了 candidate，进入了 term 4，但 Node A 投了 NodeD 一票，NodeB 投了 Node C 一票，这就出现了平票 split vote 的情况。这个时候大家都在等啊等，直到超时后重新发起选举。如果出现平票的情况，那么就延长了系统不可用的时间（没有 leader 是不能处理客户端写请求的），因此 raft 引入了 randomized election timeouts 来尽量避免平票情况。同时，leader-based 共识算法中，节点的数目都是奇数个，尽量保证 majority 的出现。</p>
+<h2 id="3、log-replication"><a href="#3、log-replication" class="headerlink" title="#3、log replication"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-03-distribution.html#_3%E3%80%81log-replication">#</a>3、log replication</h2><p>当有了 leader，系统应该进入对外工作期了。客户端的一切请求来发送到 leader，leader 来调度这些并发请求的顺序，并且保证 leader 与 followers 状态的一致性。raft 中的做法是，将这些请求以及执行顺序告知 followers。leader 和 followers 以相同的顺序来执行这些请求，保证状态一致。</p>
+<h3 id="Replicated-state-machines"><a href="#Replicated-state-machines" class="headerlink" title="#Replicated state machines"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-03-distribution.html#replicated-state-machines">#</a>Replicated state machines</h3><p>共识算法的实现一般是基于复制状态机（Replicated state machines），何为复制状态机：</p>
+<blockquote>
+<p>If two identical, <strong>deterministic</strong> processes begin in the same state and get the same inputs in the same order, they will produce the same output and end in the same state.</p>
+</blockquote>
+<p>简单来说：<strong>相同的初识状态 + 相同的输入 &#x3D; 相同的结束状态</strong>。引文中有一个很重要的词<code>deterministic</code>，就是说不同节点要以相同且确定性的函数来处理输入，而不要引入一下不确定的值，比如本地时间等。如何保证所有节点 <code>get the same inputs in the same order</code>，使用 replicated log 是一个很不错的注意，log 具有持久化、保序的特点，是大多数分布式系统的基石。</p>
+<p>因此，可以这么说，在 raft 中，leader 将客户端请求（command）封装到一个个 log entry，将这些 log entries 复制（replicate）到所有 follower 节点，然后大家按相同顺序应用（apply）log entry 中的 command，则状态肯定是一致的。</p>
+<p>下图形象展示了这种 log-based replicated state machine<br><img src="/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245321.png" alt="img"></p>
+<h3 id="请求完整流程"><a href="#请求完整流程" class="headerlink" title="#请求完整流程"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-03-distribution.html#%E8%AF%B7%E6%B1%82%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B">#</a>请求完整流程</h3><p>当系统（leader）收到一个来自客户端的写请求，到返回给客户端，整个过程从 leader 的视角来看会经历以下步骤：</p>
+<ul>
+<li>leader append log entry</li>
+<li>leader issue AppendEntries RPC in parallel</li>
+<li>leader wait for majority response</li>
+<li>leader apply entry to state machine</li>
+<li>leader reply to client</li>
+<li>leader notify follower apply log</li>
+</ul>
+<p>可以看到日志的提交过程有点类似两阶段提交 (2PC)，不过与 2PC 的区别在于，leader 只需要大多数（majority）节点的回复即可，这样只要超过一半节点处于工作状态则系统就是可用的。</p>
+<p>那么日志在每个节点上是什么样子的呢<br><img src="/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245795.png" alt="img"></p>
+<p>不难看到，logs 由顺序编号的 log entry 组成 ，每个 log entry 除了包含 command，还包含产生该 log entry 时的 leader term。从上图可以看到，五个节点的日志并不完全一致，raft 算法为了保证高可用，并不是强一致性，而是最终一致性，leader 会不断尝试给 follower 发 log entries，直到所有节点的 log entries 都相同。</p>
+<p>在上面的流程中，leader 只需要日志被复制到大多数节点即可向客户端返回，一旦向客户端返回成功消息，那么系统就必须保证 log（其实是 log 所包含的 command）在任何异常的情况下都不会发生回滚。这里有两个词：commit（committed），apply(applied)，前者是指日志被复制到了大多数节点后日志的状态；而后者则是节点将日志应用到状态机，真正影响到节点状态。</p>
+<blockquote>
+<p>The leader decides when it is safe to apply a log entry to the state machines; such an entry is called committed. Raft guarantees that committed entries are durable and will eventually be executed by all of the available state machines. A log entry is committed once the leader that created the entry has replicated it on a majority of the servers</p>
+</blockquote>
+<h2 id="4、safety"><a href="#4、safety" class="headerlink" title="#4、safety"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-03-distribution.html#_4%E3%80%81safety">#</a>4、safety</h2><p>在上面提到只要日志被复制到 majority 节点，就能保证不会被回滚，即使在各种异常情况下，这根 leader election 提到的选举约束有关。在这一部分，主要讨论 raft 协议在各种各样的异常情况下如何工作的。</p>
+<p>衡量一个分布式算法，有许多属性，如</p>
+<ul>
+<li>safety：nothing bad happens,</li>
+<li>liveness： something good eventually happens.</li>
+</ul>
+<p>在任何系统模型下，都需要满足 safety 属性，即在任何情况下，系统都不能出现不可逆的错误，也不能向客户端返回错误的内容。比如，raft 保证被复制到大多数节点的日志不会被回滚，那么就是 safety 属性。而 raft 最终会让所有节点状态一致，这属于 liveness 属性。</p>
+<p>raft 协议会保证以下属性<br><img src="/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245235.png" alt="img"></p>
+<h3 id="Election-safety"><a href="#Election-safety" class="headerlink" title="#Election safety"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-03-distribution.html#election-safety">#</a>Election safety</h3><p>选举安全性，即任一任期内最多一个 leader 被选出。这一点非常重要，在一个复制集中任何时刻只能有一个 leader。系统中同时有多余一个 leader，被称之为脑裂（brain split），这是非常严重的问题，会导致数据的覆盖丢失。在 raft 中，两点保证了这个属性：</p>
+<ul>
+<li>一个节点某一任期内最多只能投一票；</li>
+<li>只有获得 majority 投票的节点才会成为 leader。</li>
+</ul>
+<p>因此，<strong>某一任期内一定只有一个 leader</strong>。</p>
+<h3 id="log-matching"><a href="#log-matching" class="headerlink" title="#log matching"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-03-distribution.html#log-matching">#</a>log matching</h3><p>很有意思，log 匹配特性， 就是说如果两个节点上的某个 log entry 的 log index 相同且 term 相同，那么在该 index 之前的所有 log entry 应该都是相同的。如何做到的？依赖于以下两点</p>
+<ul>
+<li>If two entries in different logs have the same index and term, then they store the same command.</li>
+<li>If two entries in different logs have the same index and term, then the logs are identical in all preceding entries.</li>
+</ul>
+<p>首先，leader 在某一 term 的任一位置只会创建一个 log entry，且 log entry 是 append-only。其次，consistency check。leader 在 AppendEntries 中包含最新 log entry 之前的一个 log 的 term 和 index，如果 follower 在对应的 term index 找不到日志，那么就会告知 leader 不一致。</p>
+<p>在没有异常的情况下，log matching 是很容易满足的，但如果出现了 node crash，情况就会变得负责。比如下图<br><img src="/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245788.png" alt="img"></p>
+<p><strong>注意</strong>：上图的 a-f 不是 6 个 follower，而是某个 follower 可能存在的六个状态</p>
+<p>leader、follower 都可能 crash，那么 follower 维护的日志与 leader 相比可能出现以下情况</p>
+<ul>
+<li>比 leader 日志少，如上图中的 ab</li>
+<li>比 leader 日志多，如上图中的 cd</li>
+<li>某些位置比 leader 多，某些日志比 leader 少，如 ef（多少是针对某一任期而言）</li>
+</ul>
+<p>当出现了 leader 与 follower 不一致的情况，leader 强制 follower 复制自己的 log</p>
+<blockquote>
+<p>To bring a follower’s log into consistency with its own, the leader must find the latest log entry where the two logs agree, delete any entries in the follower’s log after that point, and send the follower all of the leader’s entries after that point.</p>
+</blockquote>
+<p>leader 会维护一个 nextIndex[] 数组，记录了 leader 可以发送每一个 follower 的 log index，初始化为 eader 最后一个 log index 加 1， 前面也提到，leader 选举成功之后会立即给所有 follower 发送 AppendEntries RPC（不包含任何 log entry， 也充当心跳消息）, 那么流程总结为：</p>
+<blockquote>
+<p>s1 leader 初始化 nextIndex[x] 为 leader 最后一个 log index + 1<br>s2 AppendEntries 里 prevLogTerm prevLogIndex 来自 logs[nextIndex[x] - 1]<br>s3 如果 follower 判断 prevLogIndex 位置的 log term 不等于 prevLogTerm，那么返回 False，否则返回 True<br>s4 leader 收到 follower 的回复，如果返回值是 False，则 nextIndex[x] -&#x3D; 1, 跳转到 s2. 否则<br>s5 同步 nextIndex[x] 后的所有 log entries</p>
+</blockquote>
+<h3 id="leader-completeness-vs-elcetion-restriction"><a href="#leader-completeness-vs-elcetion-restriction" class="headerlink" title="#leader completeness vs elcetion restriction"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-03-distribution.html#leader-completeness-vs-elcetion-restriction">#</a>leader completeness vs elcetion restriction</h3><p>leader 完整性：如果一个 log entry 在某个任期被提交（committed），那么这条日志一定会出现在所有更高 term 的 leader 的日志里面。这个跟 leader election、log replication 都有关。</p>
+<ul>
+<li>一个日志被复制到 majority 节点才算 committed</li>
+<li>一个节点得到 majority 的投票才能成为 leader，而节点 A 给节点 B 投票的其中一个前提是，B 的日志不能比 A 的日志旧。下面的引文指处了如何判断日志的新旧</li>
+</ul>
+<blockquote>
+<p>voter denies its vote if its own log is more up-to-date than that of the candidate.</p>
+</blockquote>
+<blockquote>
+<p>If the logs have last entries with different terms, then the log with the later term is more up-to-date. If the logs end with the same term, then whichever log is longer is more up-to-date.</p>
+</blockquote>
+<p>上面两点都提到了 majority：commit majority and vote majority，根据 Quorum，这两个 majority 一定是有重合的，因此被选举出的 leader 一定包含了最新的 committed 的日志。</p>
+<p>raft 与其他协议（Viewstamped Replication、mongodb）不同，raft 始终保证 leade 包含最新的已提交的日志，因此 leader 不会从 follower catchup 日志，这也大大简化了系统的复杂度。</p>
+<h2 id="5、corner-case"><a href="#5、corner-case" class="headerlink" title="#5、corner case"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-03-distribution.html#_5%E3%80%81corner-case">#</a>5、corner case</h2><p>stale leader</p>
+<p>raft 保证 Election safety，即一个任期内最多只有一个 leader，但在网络分割（network partition）的情况下，<strong>可能会出现两个 leader，但两个 leader 所处的任期是不同的</strong>。如下图所示<br><img src="/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245777.png" alt="img"></p>
+<p>系统有 5 个节点 ABCDE 组成，在 term1，Node B 是 leader，但 Node A、B 和 Node C、D、E 之间出现了网络分割，因此 Node C、D、E 无法收到来自 leader（Node B）的消息，在 election time 之后，Node C、D、E 会分期选举，由于满足 majority 条件，Node E 成为了 term 2 的 leader。因此，在系统中貌似出现了两个 leader：term 1 的 Node B， term 2 的 Node E, Node B 的 term 更旧，但由于无法与 Majority 节点通信，NodeB 仍然会认为自己是 leader。</p>
+<p>在这样的情况下，我们来考虑读写。</p>
+<p>首先，如果客户端将请求发送到了 NodeB，NodeB 无法将 log entry 复制到 majority 节点，因此不会告诉客户端写入成功，这就不会有问题。</p>
+<p>对于读请求，stale leader 可能返回 stale data，比如在 read-after-write 的一致性要求下，客户端写入到了 term2 任期的 leader Node E，但读请求发送到了 Node B。如果要保证不返回 stale data，leader 需要 check 自己是否过时了，办法就是与大多数节点通信一次，这个可能会出现效率问题。另一种方式是使用 lease，但这就会依赖物理时钟。</p>
+<p>从 raft 的论文中可以看到，leader 转换成 follower 的条件是收到来自更高 term 的消息，如果网络分割一直持续，那么 stale leader 就会一直存在。而在 raft 的一些实现或者 raft-like 协议中，leader 如果收不到 majority 节点的消息，那么可以自己 step down，自行转换到 follower 状态。</p>
+<h3 id="State-Machine-Safety"><a href="#State-Machine-Safety" class="headerlink" title="#State Machine Safety"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-03-distribution.html#state-machine-safety">#</a>State Machine Safety</h3><p>前面在介绍 safety 的时候有一条属性没有详细介绍，那就是 State Machine Safety：</p>
+<blockquote>
+<p>State Machine Safety: if a server has applied a log entry at a given index to its state machine, no other server will ever apply a different log entry for the same index.</p>
+</blockquote>
+<p>如果节点将某一位置的 log entry 应用到了状态机，那么其他节点在同一位置不能应用不同的日志。简单点来说，所有节点在同一位置（index in log entries）应该应用同样的日志。但是似乎有某些情况会违背这个原则：<br><img src="/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245596.png" alt="img"></p>
+<p>上图是一个较为复杂的情况。在时刻 (a), s1 是 leader，在 term2 提交的日志只赋值到了 s1 s2 两个节点就 crash 了。在时刻（b), s5 成为了 term 3 的 leader，日志只赋值到了 s5，然后 crash。然后在(c) 时刻，s1 又成为了 term 4 的 leader，开始赋值日志，于是把 term2 的日志复制到了 s3，此刻，可以看出 term2 对应的日志已经被复制到了 majority，因此是 committed，可以被状态机应用。不幸的是，接下来（d）时刻，s1 又 crash 了，s5 重新当选，然后将 term3 的日志复制到所有节点，这就出现了一种奇怪的现象：被复制到大多数节点（或者说可能已经应用）的日志被回滚。</p>
+<p>究其根本，是因为 term4 时的 leader s1 在（C）时刻提交了之前 term2 任期的日志。为了杜绝这种情况的发生：</p>
+<blockquote>
+<p><strong>Raft never commits log entries from previous terms by counting replicas</strong>.<br>Only log entries from the leader’s current term are committed by counting replicas; once an entry from the current term has been committed in this way, then all prior entries are committed indirectly because of the Log Matching Property.</p>
+</blockquote>
+<p>也就是说，某个 leader 选举成功之后，不会直接提交前任 leader 时期的日志，而是通过提交当前任期的日志的时候 “顺手” 把之前的日志也提交了，具体怎么实现了，在 log matching 部分有详细介绍。那么问题来了，如果 leader 被选举后没有收到客户端的请求呢，论文中有提到，在任期开始的时候发立即尝试复制、提交一条空的 log</p>
+<blockquote>
+<p>Raft handles this by having each leader commit a blank no-op entry into the log at the start of its term.</p>
+</blockquote>
+<p>因此，在上图中，不会出现（C）时刻的情况，即 term4 任期的 leader s1 不会复制 term2 的日志到 s3。而是如同 (e) 描述的情况，通过复制 - 提交 term4 的日志顺便提交 term2 的日志。如果 term4 的日志提交成功，那么 term2 的日志也一定提交成功，此时即使 s1crash，s5 也不会重新当选。</p>
+<h3 id="leader-crash"><a href="#leader-crash" class="headerlink" title="#leader crash"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-03-distribution.html#leader-crash">#</a>leader crash</h3><p>follower 的 crash 处理方式相对简单，leader 只要不停的给 follower 发消息即可。当 leader crash 的时候，事情就会变得复杂。在<a target="_blank" rel="noopener" href="http://www.cnblogs.com/mindwind/p/5231986.html">这篇文章 (opens new window)</a>中，作者就给出了一个更新请求的流程图。<br><img src="/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103.assets/202206222245472.png" alt="img"> 我们可以分析 leader 在任意时刻 crash 的情况，有助于理解 raft 算法的容错性。</p>
+<h1 id="6、总结"><a href="#6、总结" class="headerlink" title="#6、总结"></a><a target="_blank" rel="noopener" href="https://interviewguide.cn/notes/03-hunting_job/02-interview/05-01-03-distribution.html#_6%E3%80%81%E6%80%BB%E7%BB%93">#</a>6、总结</h1><p>raft 将共识问题分解成两个相对独立的问题，leader election，log replication。流程是先选举出 leader，然后 leader 负责复制、提交 log（log 中包含 command）</p>
+<p>为了在任何异常情况下系统不出错，即满足 safety 属性，对 leader election，log replication 两个子问题有诸多约束</p>
+<p>leader election 约束：</p>
+<ul>
+<li>同一任期内最多只能投一票，先来先得</li>
+<li>选举人必须比自己知道的更多（比较 term，log index）</li>
+</ul>
+<p>log replication 约束：</p>
+<ul>
+<li>一个 log 被复制到大多数节点，就是 committed，保证不会回滚</li>
+<li>leader 一定包含最新的 committed log，因此 leader 只会追加日志，不会删除覆盖日志</li>
+<li>不同节点，某个位置上日志相同，那么这个位置之前的所有日志一定是相同的</li>
+<li>Raft never commits log entries from previous terms by counting replicas.</li>
+</ul>
+<p>本文是在看完 raft 论文后自己的总结，不一定全面。个人觉得，如果只是相对 raft 协议有一个简单了解，看这个<a target="_blank" rel="noopener" href="http://thesecretlivesofdata.com/raft/">动画演示 (opens new window)</a>就足够了，如果想深入了解，还是要看论文，论文中 Figure 2 对 raft 算法进行了概括。最后，还是找一个实现了 raft 算法的系统来看看更好。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>原创技术分享，您的支持将鼓励我继续创作</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="wFei 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="wFei 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>wFei
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://holdustogether.github.io/2022/09/21/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103/" title="系统设计-Raft">https://holdustogether.github.io/2022/09/21/系统设计03/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" rel="tag"># 系统设计</a>
+              <a href="/tags/Raft/" rel="tag"># Raft</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/09/21/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A102/" rel="prev" title="系统设计-分布式缓存、锁以及事务">
+      <i class="fa fa-chevron-left"></i> 系统设计-分布式缓存、锁以及事务
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/09/21/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A101/" rel="next" title="系统设计-分布式高并发">
+      系统设计-分布式高并发 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Raft"><span class="nav-number">1.</span> <span class="nav-text">Raft</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81Raft-Overview"><span class="nav-number">1.1.</span> <span class="nav-text">1、Raft Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81leader-election"><span class="nav-number">1.2.</span> <span class="nav-text">2、leader election</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#term"><span class="nav-number">1.2.1.</span> <span class="nav-text">term</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%89%E4%B8%BE%E8%BF%87%E7%A8%8B%E8%AF%A6%E8%A7%A3"><span class="nav-number">1.2.2.</span> <span class="nav-text">选举过程详解</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%E3%80%81log-replication"><span class="nav-number">1.3.</span> <span class="nav-text">3、log replication</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Replicated-state-machines"><span class="nav-number">1.3.1.</span> <span class="nav-text">Replicated state machines</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%B7%E6%B1%82%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B"><span class="nav-number">1.3.2.</span> <span class="nav-text">请求完整流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4%E3%80%81safety"><span class="nav-number">1.4.</span> <span class="nav-text">4、safety</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Election-safety"><span class="nav-number">1.4.1.</span> <span class="nav-text">Election safety</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#log-matching"><span class="nav-number">1.4.2.</span> <span class="nav-text">log matching</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#leader-completeness-vs-elcetion-restriction"><span class="nav-number">1.4.3.</span> <span class="nav-text">leader completeness vs elcetion restriction</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5%E3%80%81corner-case"><span class="nav-number">1.5.</span> <span class="nav-text">5、corner case</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#State-Machine-Safety"><span class="nav-number">1.5.1.</span> <span class="nav-text">State Machine Safety</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#leader-crash"><span class="nav-number">1.5.2.</span> <span class="nav-text">leader crash</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6%E3%80%81%E6%80%BB%E7%BB%93"><span class="nav-number">2.</span> <span class="nav-text">6、总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="wFei"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">wFei</p>
+  <div class="site-description" itemprop="description">不要停止成为更好的自己</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/holdustogether" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;holdustogether" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/wf1657885988@163.com" title="E-Mail → wf1657885988@163.com"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+	<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=450 src="//music.163.com/outchain/player?type=0&id=7614662893&auto=1&height=430"></iframe>
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022.08 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wFei</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">博客全站共65.1k字</span>
+</div>
+
+    <div>
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+    </div>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='128,136,147' opacity='0.8' zIndex='-1' count='150' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  <!-- ҳ����С���� -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
